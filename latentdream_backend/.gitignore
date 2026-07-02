@@ -1,0 +1,12 @@
+# Ignore environment variables
+.env
+
+# Ignore Python cache and virtual environments
+__pycache__/
+.venv/
+venv/
+.env/
+
+# Keep all other files (like your code)
+!*.py
+!*.md
