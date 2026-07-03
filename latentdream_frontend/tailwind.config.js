@@ -2,7 +2,7 @@
  * @file tailwind.config.js
  * @description Configures the Tailwind CSS framework architecture components. 
  * Defines target source file processing paths to ensure utility classes used 
- * in the user interface components are correctly scanned and compiled[cite: 2].
+ * in the user interface components are correctly scanned and compiled.
  */
 
 /** @type {import('tailwindcss').Config} */
