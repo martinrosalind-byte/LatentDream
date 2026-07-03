@@ -2,17 +2,34 @@
 Filename: main.py
 Author: Rosalind Barrett
 Institution: National College of Ireland (NCI)
-Description: Final production-ready FastAPI gateway for LatentDream. 
-             Orchestrates LangChain LCEL pipelines with SQLAlchemy database persistence 
-             to provide verifiable and historically recorded psychoanalytic endpoints.
+Description: Core architectural gateway for the LatentDream generative engine.
+             Orchestrates stateful LangChain LCEL chains with a PostgreSQL 
+             persistence layer via SQLAlchemy to provide historically recorded, 
+             verifiable psychoanalytic interpretation endpoints.
+
+Academic Abstract:
+This software module serves as the primary business logic layer for a decoupled
+web application designed to digitize traditional clinical dream analysis. 
+The system enforces strict theoretical guardrails to neutralize the risk of 
+non-Freudian concept leakage. By implementing LangChain Expression Language (LCEL), 
+raw textual data payloads (manifest content) are transformed into structured, 
+theoretically rigorous diagnostic evaluations (latent content).
+
+Design Patterns & Architectural Tactics:
+- Data Transfer Object (DTO): Managed via Pydantic schemas to validate types at the network edge.
+- Dependency Injection: Leverages FastAPI's dependency management to handle database session pools.
+- Algorithmic Repression Guard: Employs system context prompts to establish hard boundary rules for the LLM runtime.
 """
 
 import os
 from fastapi import FastAPI, HTTPException, Depends
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
 from sqlalchemy.orm import Session
+from typing import List, Dict
 
+# Core GenAI and orchestration chain dependencies
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
@@ -21,73 +38,138 @@ from langchain_core.output_parsers import StrOutputParser
 import models
 from database import engine, get_db
 
-# Initialize application and auto-generate database schema tables upon startup
-app = FastAPI(title="LatentDream Core Analysis Engine")
-models.Base.metadata.create_all(bind=engine)
-
-# Load context environment configuration variables
+# Load context environment configuration variables from the root folder
 load_dotenv()
 google_key = os.getenv("GOOGLE_API_KEY")
 
-# Model configuration initialization
-llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", google_api_key=google_key, temperature=0.7)
+if not google_key:
+    raise RuntimeError("System Environment Configuration Error: GOOGLE_API_KEY is missing from the environment settings.")
 
-# Psychoanalytic core constraints alignment prompt
-FREUDIAN_SYSTEM_CONTEXT = (
-    "You are an expert psychoanalyst operating strictly within the paradigm of classical Sigmund Freud theories. "
-    "Analyze the provided dream text systematically. Explicitly isolate the Manifest Content from the Latent Content. "
-    "Utilize precise Freudian nomenclature, including concepts such as the Id, Ego, Superego, and structural Repression."
+# Auto-generate database schema tables upon application startup state
+models.Base.metadata.create_all(bind=engine)
+
+# Initialize application instance and document title metadata
+app = FastAPI(
+    title="LatentDream Core Analysis Engine",
+    description="FastAPI gateway managing Freudian translation pipelines and persistence transactions.",
+    version="1.0.0"
 )
 
-prompt_template = ChatPromptTemplate.from_messages([
+# Configure Cross-Origin Resource Sharing (CORS) security protocols
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],  # Vite development local port
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Initialize the Gemini deep learning model framework 
+llm = ChatGoogleGenerativeAI(
+    model="gemini-2.5-flash", 
+    google_api_key=google_key, 
+    temperature=0.4  # Lowered temperature to minimize speculative hallucinations and enforce accuracy
+)
+
+# Strict Freudian context guardrails to stop modern or unscientific ideas from leaking
+FREUDIAN_SYSTEM_CONTEXT = (
+    "You are an expert clinical psychoanalyst operating strictly within the paradigm of classical Sigmund Freud theories "
+    "as outlined in 'The Interpretation of Dreams' (1899). Your objective is to process a manifest dream narrative "
+    "alongside the user's conversational free-association responses to compile a cohesive analysis report.\n\n"
+    "CRITICAL CONSTRAINTS:\n"
+    "1. Never use modern psychological frameworks, archetypes, or generic dream dictionaries.\n"
+    "2. You must explain the transition from visible story (Manifest Content) to hidden meaning (Latent Content).\n"
+    "3. Explicitly identify and isolate clinical mechanisms such as Condensation, Displacement, or Wish-Fulfillment.\n"
+    "4. Frame all evaluations using structural terminology, referencing the dynamics of the Id, Ego, Superego, and Repression."
+)
+
+report_prompt_template = ChatPromptTemplate.from_messages([
     ("system", FREUDIAN_SYSTEM_CONTEXT),
-    ("user", "Analyze the following dream sequence: {dream_text}")
+    (
+        "system", 
+        "Contextual Session Data:\n"
+        "Original Dream: {dream_text}\n"
+        "Free Association Transcripts: {transcript_text}"
+    ),
+    ("user", "Compile the final Freudian Interpretation Report following these exact requirements.")
 ])
 
-# LangChain Expression Language (LCEL) execution pipeline execution engine
-freudian_analysis_chain = prompt_template | llm | StrOutputParser()
+# LangChain Expression Language (LCEL) execution pipeline engine
+freudian_report_chain = report_prompt_template | llm | StrOutputParser()
 
-class DreamRequest(BaseModel):
-    """Data Transfer Object modeling incoming JSON payloads."""
+
+class AnalysisRequest(BaseModel):
+    """Data Transfer Object modeling incoming diagnostic evaluation payloads."""
     dream_text: str
+    transcript: List[Dict[str, str]]
 
 
-@app.post("/analyze")
-async def analyze_dream(request: DreamRequest, db: Session = Depends(get_db)):
+@app.post("/api/analyze")
+async def generate_interpretation(request: AnalysisRequest, db: Session = Depends(get_db)):
     """
-    HTTP POST: Processes raw dream strings through the LCEL AI chain,
-    saves both inputs and generated inferences to the database layer, and returns the analysis.
+    HTTP POST Endpoint: Processes the complete session dataset through the LCEL AI chain,
+    permanently flushes transaction data records to PostgreSQL, and returns the compiled text.
     """
+    # System boundary validation check
+    if not request.dream_text.strip():
+        raise HTTPException(status_code=400, detail="Network payload violation: Original manifest text is required.")
+
     try:
-        # 1. Execute the generative AI interpretation engine
-        analysis_output = freudian_analysis_chain.invoke({"dream_text": request.dream_text})
-        
-        # 2. DATA PERSISTENCE INTEGRATION (The Missing Link):
-        # Instantiate an entity record structure using the schema model
+        # Formulate a structured string block from the conversation history matrix
+        formatted_transcript = ""
+        for msg in request.transcript:
+            sender = "User" if msg.get("sender") == "user" else "Analyst (AI)"
+            formatted_transcript += f"{sender}: {msg.get('text')}\n"
+
+        # Execute the generative interpretation pipeline asynchronously
+        interpretation_report = freudian_report_chain.invoke({
+            "dream_text": request.dream_text,
+            "transcript_text": formatted_transcript
+        })
+
+        # Instantiate a data model entity record structure for persistent database saving
         db_record = models.DreamHistory(
             dream_text=request.dream_text,
-            interpretation=analysis_output
+            interpretation=interpretation_report
         )
-        db.add(db_record)     # Stage record to the database transaction
-        db.commit()          # Safely flush and save transaction states permanently
-        db.refresh(db_record)   # Refresh instance state to gather generated identifiers
         
-        return {"id": db_record.id, "interpretation": analysis_output}
+        db.add(db_record)        # Stage the new entry inside the database transaction
+        db.commit()              # Securely flush and save transaction states permanently
+        db.refresh(db_record)    # Fetch the unique auto-generated primary key identifier
         
-    except Exception as e:
-        db.rollback() # Reverse uncommitted operations in case of transaction state failure
-        raise HTTPException(status_code=500, detail=f"Upstream Generative Processing Error: {str(e)}")
+        return {
+            "status": "success",
+            "id": db_record.id, 
+            "interpretation": interpretation_report
+        }
+        
+    except Exception as error_exception:
+        db.rollback()  # Safely roll back transaction states to prevent data corruption on error
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Upstream Generative Framework Error: {str(error_exception)}"
+        )
 
 
-@app.get("/history")
+@app.get("/api/history")
 async def get_dream_history(db: Session = Depends(get_db)):
     """
-    HTTP GET: Retrieves all historical records sorted chronologically.
-    Feeds the data lifecycle pipeline for frontend 'History Dashboard' presentation layout components.
+    HTTP GET Endpoint: Retrieves archived records from the database sorted chronologically.
+    Feeds user logs directly into the frontend history component timeline.
     """
     try:
-        # Queries the database for all records stored within the entity structure table
-        history = db.query(models.DreamHistory).order_by(models.DreamHistory.created_at.desc()).all()
-        return history
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Database Retrieval Operations Failure: {str(e)}")
+        history_records = db.query(models.DreamHistory).order_by(models.DreamHistory.created_at.desc()).all()
+        return history_records
+    except Exception as database_error:
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Database Access Subsystem Failure: {str(database_error)}"
+        )
+
+
+@app.get("/api/health")
+async def operational_health_check():
+    """
+    Diagnostic runtime health check to maintain visibility of backend performance states.
+    """
+    return {"status": "healthy", "engine": "LatentDream Python Execution Server"}
