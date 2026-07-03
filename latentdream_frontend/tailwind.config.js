@@ -1,10 +1,13 @@
 /**
  * @file tailwind.config.js
- * @description Core configuration layout framework for the Tailwind CSS design system.
- * Configures explicit content path matrices across the client-side presentation layer 
- * to automate modular design generation for the LatentDream UI framework.
+ * @description Configures the Tailwind CSS framework architecture components. 
+ * Defines target source file processing paths to ensure utility classes used 
+ * in the user interface components are correctly scanned and compiled[cite: 2].
  */
+
+/** @type {import('tailwindcss').Config} */
 export default {
+  // Explicitly registers source directories for structural utility extraction
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
