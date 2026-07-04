@@ -9,10 +9,10 @@ import './index.css';
 /**
  * @file App.jsx
  * @description Centralized state orchestrator and root network routing node for the LatentDream React client application.
- * This component handles user interaction stages and replaces local mock counters with live network request payloads.
- * * Architectural Design Patterns:
+ * Incorporates global ethereal aesthetic wrappers to deliver a unified, immersive user experience.
+ * * * Architectural & UI Design Patterns:
  * - Centralized State Controller: Maintains top-level data immutability for active session tracking.
- * - Asynchronous Boundary Interface: Leverages standard Web Fetch APIs to manage client-server communications cleanly.
+ * - Glassmorphism UI Wrapper: Utilizes backdrop-filters and alpha-channel backgrounds for the header/footer.
  * - Reactive Error Isolation: Intercepts network disconnect anomalies to protect local view execution states.
  */
 function App() {
@@ -104,26 +104,34 @@ function App() {
   };
 
   return (
-    <div className="App antialiased text-slate-800 bg-gray-50 min-h-screen flex flex-col justify-between font-sans">
+    /* 1. INJECTED .dream-viewport-bg: 
+      Replaces standard grey background with the animated CSS gradient mesh.
+      Text is inverted to text-slate-100 to ensure high contrast against dark celestial colors.
+    */
+    <div className="App antialiased text-slate-100 dream-viewport-bg flex flex-col justify-between font-sans relative">
       
       {/* Universal Application Navigation Header Bar */}
       {currentStage !== 'AUTH' && (
-        <header className="w-full bg-white border-b border-gray-200 py-4 px-6 shadow-sm">
+        /* 2. HEADER GLASSMORPHISM: 
+          Replaced solid white background with semi-transparent black (bg-black/20) 
+          and a frosted glass blur (backdrop-blur-md).
+        */
+        <header className="w-full bg-black/20 backdrop-blur-md border-b border-white/10 py-4 px-6 shadow-sm z-10">
           <div className="max-w-6xl mx-auto flex justify-between items-center">
-            <h1 className="text-xl font-bold text-purple-700 tracking-tight">
-              LatentDream <span className="text-xs font-normal text-gray-400">v1.0 (Freudian Framework)</span>
+            <h1 className="text-xl font-bold text-purple-300 tracking-tight drop-shadow-md">
+              LatentDream <span className="text-xs font-normal text-purple-200/60 ml-2">v1.0 (Freudian Framework)</span>
             </h1>
             
             <div className="flex items-center space-x-4">
               {currentStage !== 'CHAT' && currentStage !== 'PROCESSING' && (
                 <button
                   onClick={() => setCurrentStage(currentStage === 'HISTORY' ? 'INPUT' : 'HISTORY')}
-                  className="text-xs font-medium text-purple-600 hover:text-purple-800 underline cursor-pointer"
+                  className="text-xs font-medium text-purple-300 hover:text-purple-100 transition-colors cursor-pointer"
                 >
                   {currentStage === 'HISTORY' ? "Back to Workspace" : "View Saved Journal History"}
                 </button>
               )}
-              <div className="text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-full border">
+              <div className="text-xs text-purple-100 bg-purple-900/40 px-3 py-1 rounded-full border border-purple-400/30 shadow-inner">
                 Active User Session
               </div>
             </div>
@@ -132,23 +140,27 @@ function App() {
       )}
 
       {/* Primary Reactive Application Content Switchboard */}
-      <main className="flex-grow flex items-center justify-center p-4 my-6">
+      <main className="flex-grow flex items-center justify-center p-4 my-6 z-10 relative">
         
         {/* Network Exception Alert Drawer Banner */}
         {networkError && (
-          <div className="absolute top-20 left-1/2 transform -translate-x-1/2 max-w-xl w-full mx-auto p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm shadow-md z-50">
+          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 max-w-xl w-full mx-auto p-4 bg-red-900/80 backdrop-blur-md border border-red-400 text-red-100 rounded-xl text-sm shadow-2xl z-50">
             {networkError}
           </div>
         )}
 
         {/* Stage 1: Secure Identity Gateway Entry Layer */}
         {currentStage === 'AUTH' && (
-          <div className="w-full max-w-md bg-slate-900 p-6 rounded-2xl shadow-xl text-slate-200">
+          /* 3. DREAM CARD & FLOAT: 
+            Replaced the static background box with our custom .dream-card frosted glass effect 
+            and the .ethereal-float zero-gravity hovering animation.
+          */
+          <div className="w-full max-w-md p-8 dream-card ethereal-float">
             <Login onLoginSuccess={handleLoginSuccess} />
-            <div className="mt-4 text-center">
+            <div className="mt-6 text-center border-t border-white/10 pt-4">
               <button 
                 onClick={handleLoginSuccess} 
-                className="text-xs text-purple-400 hover:underline cursor-pointer"
+                className="text-xs text-purple-300 hover:text-purple-100 transition-colors cursor-pointer"
               >
                 (Dev Mode Bypass: Click here to enter app directly)
               </button>
@@ -163,10 +175,10 @@ function App() {
 
         {/* Stage 3: Live Asynchronous API Network Handshake Loading Visual */}
         {currentStage === 'PROCESSING' && (
-          <div className="text-center space-y-4 animate-pulse">
-            <div className="w-12 h-12 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
-            <h3 className="text-lg font-semibold text-gray-700">Decomposing Manifest Content...</h3>
-            <p className="text-xs text-gray-400 max-w-xs mx-auto">
+          <div className="text-center space-y-5 animate-pulse ethereal-float">
+            <div className="w-14 h-14 border-4 border-purple-400 border-t-transparent rounded-full animate-spin mx-auto drop-shadow-[0_0_15px_rgba(168,85,247,0.5)]"></div>
+            <h3 className="text-xl font-semibold text-white drop-shadow-md">Decomposing Manifest Content...</h3>
+            <p className="text-sm text-purple-200/70 max-w-sm mx-auto leading-relaxed">
               Transmitting dataset over the network to trigger LangChain prompt routing and execute Gemini API symbol extraction.
             </p>
           </div>
@@ -198,7 +210,8 @@ function App() {
 
       {/* Structural Academic Evaluation Identification Footer */}
       {currentStage !== 'AUTH' && (
-        <footer className="w-full bg-white border-t border-gray-200 py-3 text-center text-xs text-gray-400">
+        /* 4. FOOTER GLASSMORPHISM: Matches the translucent header aesthetic */
+        <footer className="w-full bg-black/20 backdrop-blur-md border-t border-white/10 py-4 text-center text-xs text-purple-200/50 z-10">
           &copy; 2026 LatentDream Project &middot; National College of Ireland Portfolio.
         </footer>
       )}
