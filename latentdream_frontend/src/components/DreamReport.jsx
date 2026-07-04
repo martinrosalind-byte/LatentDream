@@ -10,15 +10,15 @@ import React from 'react';
  * like condensation (combining multiple ideas into one image) and displacement (shifting emotional priority) 
  * to disguise forbidden unconscious wishes. This report layout explicitly categorizes elements into 
  * Manifest Imagery, Unconscious Desires, and Ego Defenses to map out those hidden conflicts.
- * * Technical Design Considerations:
- * - Implements a stateless functional component pattern, relying entirely on stable immutable props 
- * passed down from the root layout core.
- * - Utilizes Tailwind CSS grid structures to create highly scannable visual reporting panels 
- * matching usability metric NFR-003.
+ * * Technical & UI Design Considerations:
+ * - Implements a stateless functional component pattern, relying entirely on stable immutable props.
+ * - Glassmorphic UI (NFR-003): Utilizes translucent Tailwind CSS grid structures to create highly scannable 
+ * visual reporting panels that maintain visual immersion over the global celestial background.
  */
-export default function DreamReport({ manifestContent, chatTranscript, onReset }) {
+export default function DreamReport({ manifestContent, chatTranscript, liveReport, onReset }) {
   
   // Mock analysis data structure matching the theoretical output fields of the backend pipeline
+  // Note: Once the LangChain pipeline is finalized, these fields can be mapped directly from the 'liveReport' prop.
   const mockAnalysisReport = {
     summary: "The dream indicates a classic conflict between an unfulfilled infantile wish and the waking ego's defense mechanisms. The surface narrative acts as a compromise-formation to shield the dreamer from waking anxiety.",
     latentMeaning: "The act of searching represents a repressed desire for autonomy or a resolution to a childhood emotional dependency. The environment represents a state of psychological vulnerability where hidden feelings are guarded.",
@@ -30,44 +30,48 @@ export default function DreamReport({ manifestContent, chatTranscript, onReset }
   };
 
   return (
-    <div className="w-full max-w-3xl bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden space-y-6">
+    /* 1. REPORT MAIN CONTAINER: 
+       Applies the .dream-card frosted glass base and a subtle zero-gravity float 
+       to match the overarching application aesthetic.
+    */
+    <div className="w-full max-w-3xl dream-card ethereal-float overflow-hidden space-y-6 shadow-2xl">
       
       {/* Report Header Block */}
-      <div className="bg-gradient-to-r from-indigo-900 to-purple-950 p-6 text-white text-center">
-        <span className="text-xs font-semibold uppercase tracking-widest text-purple-300 bg-purple-900 bg-opacity-40 px-3 py-1 rounded-full border border-purple-700">
+      <div className="bg-black/30 backdrop-blur-md border-b border-white/10 p-6 text-white text-center">
+        <span className="text-xs font-semibold uppercase tracking-widest text-purple-200 bg-purple-900/40 px-4 py-1.5 rounded-full border border-purple-500/30 shadow-inner">
           Final Psychoanalytic Dossier
         </span>
-        <h2 className="text-2xl font-bold mt-2 tracking-tight">Latent Content Interpretation</h2>
-        <p className="text-xs text-slate-300 mt-1">Generated via Historical Freudian Metrics</p>
+        <h2 className="text-3xl font-bold mt-4 tracking-tight drop-shadow-md">Latent Content Interpretation</h2>
+        <p className="text-xs text-purple-300/60 mt-2">Generated via Historical Freudian Metrics</p>
       </div>
 
       <div className="p-6 space-y-6">
         {/* Panel 1: Original Raw Manifest Text Capture comparison */}
-        <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
-          <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">
+        <div className="bg-white/5 p-5 rounded-xl border border-white/10 shadow-inner">
+          <h4 className="text-xs font-bold text-purple-300/70 uppercase tracking-wider mb-2 drop-shadow-sm">
             Recorded Manifest Narrative (Literal Story)
           </h4>
-          <p className="text-sm text-gray-700 italic leading-relaxed">
+          <p className="text-sm text-white italic leading-relaxed">
             "{manifestContent}"
           </p>
         </div>
 
         {/* Panel 2: Core Analytical Summary Breakdown */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="p-4 rounded-xl border border-purple-100 bg-purple-50 bg-opacity-30">
-            <h4 className="text-xs font-bold text-purple-800 uppercase tracking-wider mb-2">
+          <div className="p-5 rounded-xl border border-purple-400/20 bg-purple-900/20 backdrop-blur-sm transition-all hover:bg-purple-900/30">
+            <h4 className="text-xs font-bold text-purple-300 uppercase tracking-wider mb-3 drop-shadow-sm">
               Clinical Summary Overview
             </h4>
-            <p className="text-sm text-gray-700 leading-relaxed">
+            <p className="text-sm text-purple-50 leading-relaxed">
               {mockAnalysisReport.summary}
             </p>
           </div>
 
-          <div className="p-4 rounded-xl border border-indigo-100 bg-indigo-50 bg-opacity-30">
-            <h4 className="text-xs font-bold text-indigo-800 uppercase tracking-wider mb-2">
+          <div className="p-5 rounded-xl border border-indigo-400/20 bg-indigo-900/20 backdrop-blur-sm transition-all hover:bg-indigo-900/30">
+            <h4 className="text-xs font-bold text-indigo-300 uppercase tracking-wider mb-3 drop-shadow-sm">
               Uncovered Latent Thoughts (Hidden Meaning)
             </h4>
-            <p className="text-sm text-gray-700 leading-relaxed">
+            <p className="text-sm text-indigo-50 leading-relaxed">
               {mockAnalysisReport.latentMeaning}
             </p>
           </div>
@@ -75,17 +79,18 @@ export default function DreamReport({ manifestContent, chatTranscript, onReset }
 
         {/* Panel 3: Technical Identification of Dream-Work Mechanisms */}
         <div>
-          <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">
+          <h4 className="text-xs font-bold text-purple-300/70 uppercase tracking-wider mb-3 drop-shadow-sm">
             Detected Dream-Work Mechanisms
           </h4>
           <div className="space-y-3">
             {mockAnalysisReport.mechanismsIdentified.map((mech, index) => (
-              <div key={index} className="flex items-start p-3 bg-white border border-gray-200 rounded-lg shadow-sm">
-                <div className="bg-purple-100 text-purple-700 font-bold text-xs rounded p-1 px-2 mr-3 mt-0.5">
+              /* MECHANISM BADGES: Replaced solid white rows with translucent data slots */
+              <div key={index} className="flex items-start p-4 bg-black/20 border border-white/10 rounded-xl shadow-sm hover:bg-black/30 transition-colors">
+                <div className="bg-purple-500/20 border border-purple-400/30 text-purple-200 font-bold text-xs rounded p-1.5 px-3 mr-4 mt-0.5 shadow-inner">
                   {mech.name}
                 </div>
                 <div>
-                  <p className="text-xs text-gray-600 leading-relaxed">{mech.description}</p>
+                  <p className="text-sm text-gray-200 leading-relaxed">{mech.description}</p>
                 </div>
               </div>
             ))}
@@ -93,20 +98,21 @@ export default function DreamReport({ manifestContent, chatTranscript, onReset }
         </div>
 
         {/* Panel 4: Concluding Psychoanalytic Advice */}
-        <div className="border-t border-gray-100 pt-4">
-          <h4 className="text-xs font-bold text-gray-600 uppercase tracking-wider mb-1">
+        <div className="border-t border-white/10 pt-5">
+          <h4 className="text-xs font-bold text-purple-300/70 uppercase tracking-wider mb-2 drop-shadow-sm">
             Psychoanalytic Recommendation
           </h4>
-          <p className="text-sm text-gray-600 leading-relaxed">
+          <p className="text-sm text-purple-100/90 leading-relaxed">
             {mockAnalysisReport.recommendation}
           </p>
         </div>
 
         {/* Control Button Actions to close loop sequence */}
-        <div className="pt-2">
+        <div className="pt-4">
+          {/* LUMINOUS ACTION BUTTON: Matches the aesthetic of the Input phase submit button */}
           <button
             onClick={onReset}
-            className="w-full py-3 bg-gray-900 hover:bg-black text-white font-medium rounded-xl text-sm transition-colors duration-150 shadow-sm"
+            className="w-full py-4 bg-purple-600/80 hover:bg-purple-500 text-white font-medium rounded-xl text-sm transition-all duration-300 shadow-[0_0_15px_rgba(168,85,247,0.3)] hover:shadow-[0_0_25px_rgba(168,85,247,0.6)] border border-purple-400/50"
           >
             Log a New Manifest Dream Entry
           </button>
