@@ -91,3 +91,23 @@
     padding: 32px;
   }
 }
+
+/* 5. PAGE TRANSITION ANIMATIONS
+   Applies a soft opacity fade and upward translation to newly mounted components
+   to prevent jarring visual cuts during state routing.
+*/
+.animate-fade-in {
+  animation: fadeInDrift 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  opacity: 0; /* Ensures it starts invisible before the animation kicks in */
+}
+
+@keyframes fadeInDrift {
+  0% { 
+    opacity: 0; 
+    transform: translateY(15px); 
+  }
+  100% { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
