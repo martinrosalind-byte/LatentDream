@@ -60,7 +60,9 @@ function App() {
 
     try {
       // Execute live HTTP POST communication to the backend pipeline gateway
-      const response = await fetch('http://localhost:8000/api/analyze', {
+      // Dynamically resolves to the cloud environment variable, falling back to the hardcoded Render URL
+      const backendUrl = import.meta.env.VITE_API_URL || 'https://latentdream.onrender.com';
+      const response = await fetch(`${backendUrl}/api/analyze`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -139,8 +141,8 @@ function App() {
         </header>
       )}
 
-      {/* Primary Reactive Application Content Switchboard */}
-      <main className="flex-grow flex items-center justify-center p-4 my-6 z-10 relative">
+{/* Primary Reactive Application Content Switchboard */}
+      <main key={currentStage} className="flex-grow flex items-center justify-center p-4 my-6 z-10 relative animate-fade-in">
         
         {/* Network Exception Alert Drawer Banner */}
         {networkError && (
