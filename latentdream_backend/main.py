@@ -51,14 +51,14 @@ models.Base.metadata.create_all(bind=engine)
 # Initialize application instance and document title metadata
 app = FastAPI(
     title="LatentDream Core Analysis Engine",
-    description="FastAPI gateway managing Freudian translation pipelines and persistence transactions.",
+    description="Automated psychoanalytic dream interpretation backend executing classical Freudian methodology.",
     version="1.0.0"
 )
 
 # Configure Cross-Origin Resource Sharing (CORS) security protocols
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],  # Vite development local port
+    allow_origins=["http://localhost:5173", "*"],  # Permitting local testing and external production traffic
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
