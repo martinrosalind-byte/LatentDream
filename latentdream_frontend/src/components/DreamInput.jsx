@@ -5,16 +5,15 @@ import React, { useState } from 'react';
  * @description Core frontend interface component enabling users to log their initial manifest dream narratives.
  * This component directly satisfies Functional Requirement FR-003 (Dream Logging Interface) as specified
  * within the LatentDream Software Requirements Specification (SRS) documentation.
- * 
- * Theoretical Context:
+ * * Theoretical Context:
  * In classical Freudian psychoanalysis (Freud, 1899), the "manifest content" represents the literal imagery 
  * and conscious narrative of a dream before clinical decomposition reveals the hidden, subconscious "latent content".
  * This component acts as the baseline empirical data-capture layer for that process.
- * 
- * Architecture & Design Patterns:
+ * * Architecture & UI Design Patterns:
  * - Implements the Controlled Component Pattern to govern form state mutations via local React state variables.
  * - Enforces client-side validation thresholds to prevent null or white-space payloads from entering the network layer.
- * - Utilizes an inverse data-flow architecture (state lifting) to communicate the finalized text payload to the parent orchestrator.
+ * - Utilizes Glassmorphic UI (NFR-003): Implements semi-transparent layers and luminous focus states 
+ * to maintain contextual immersion within the global application state.
  */
 export default function DreamInput({ onSubmit }) {
   // Local state tracking the raw string data entered into the text area element
@@ -46,31 +45,41 @@ export default function DreamInput({ onSubmit }) {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6 bg-white rounded-xl shadow-md border border-gray-100">
+    /* 1. GLASSMORPHIC WRAPPER: 
+       Replaced static bg-white with .dream-card and applied the .ethereal-float animation 
+       to maintain the zero-gravity immersion established in App.jsx.
+    */
+    <div className="max-w-2xl mx-auto p-8 dream-card ethereal-float w-full">
+      
       {/* Component Header: Provides clear contextual instructions to optimize User Experience (NFR-003) */}
       <div className="mb-6 text-center">
-        <h2 className="text-2xl font-bold text-gray-800 tracking-tight">
+        <h2 className="text-3xl font-bold text-white tracking-tight drop-shadow-md">
           Record Your Manifest Dream Content
         </h2>
-        <p className="text-sm text-gray-500 mt-2">
+        <p className="text-sm text-purple-200/80 mt-3 leading-relaxed">
           According to classical psychoanalytic theory, the literal story of your dream holds hidden 
           clues to your subconscious conflicts. Describe your dream elements exactly as you recall them.
         </p>
       </div>
 
       {/* Controlled Form Architecture */}
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-6">
         <div>
           <label 
             htmlFor="dream-narrative" 
-            className="block text-sm font-medium text-gray-700 mb-2"
+            className="block text-sm font-medium text-purple-200 mb-2 drop-shadow-sm"
           >
             Dream Narrative Text Log
           </label>
+          
+          {/* 2. TRANSLUCENT INPUT SURFACE: 
+             The textarea is now semi-transparent black (bg-black/40) with a faint white border. 
+             When clicked (focus:), it glows with a soft purple ring. 
+          */}
           <textarea
             id="dream-narrative"
             rows="6"
-            className="w-full px-4 py-3 text-gray-700 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:bg-white transition-all duration-200 resize-none"
+            className="w-full px-4 py-3 text-white bg-black/40 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-400 focus:bg-black/60 transition-all duration-300 resize-none placeholder-purple-300/30 shadow-inner"
             placeholder="Describe your dream setting, events, and prominent emotional feelings..."
             value={dreamText}
             onChange={(e) => setDreamText(e.target.value)}
@@ -79,15 +88,18 @@ export default function DreamInput({ onSubmit }) {
 
         {/* Dynamic Exception UI Layout */}
         {error && (
-          <div className="text-sm text-red-600 bg-red-50 p-2 rounded border border-red-200 transition-fade">
+          <div className="text-sm text-red-200 bg-red-900/40 p-3 rounded-lg border border-red-500/30 backdrop-blur-sm transition-fade">
             {error}
           </div>
         )}
 
-        {/* Dispatch Action Button element to progress into the LangChain conversational state */}
+        {/* 3. LUMINOUS ACTION BUTTON: 
+           Features a dynamic box-shadow that creates an ambient purple glow around the button,
+           which intensifies when the user hovers over it.
+        */}
         <button
           type="submit"
-          className="w-full py-3 px-4 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg shadow-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+          className="w-full py-4 px-4 bg-purple-600/80 hover:bg-purple-500 text-white font-medium rounded-xl shadow-[0_0_15px_rgba(168,85,247,0.3)] hover:shadow-[0_0_25px_rgba(168,85,247,0.6)] border border-purple-400/50 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-transparent focus:ring-purple-400"
         >
           Begin Freudian Analysis
         </button>

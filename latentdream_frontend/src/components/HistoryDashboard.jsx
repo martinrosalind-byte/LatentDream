@@ -4,15 +4,18 @@ import React, { useState } from 'react';
  * @file HistoryDashboard.jsx
  * @description Secure journal dashboard component mapping an empirical historical timeline of user dream submissions.
  * This component satisfies Functional Requirement FR-008 (Secure Journal Dashboard) and complies with usability standards.
- * * Theoretical Context:
+ * 
+ * Theoretical Context:
  * In classical Freudian interpretation (Freud, 1899), analyzing isolated dream logs provides limited diagnostic value. 
  * True psychoanalytic discovery relies on evaluating structural repetitions across a prolonged longitudinal dataset. 
  * By tracking entries chronologically, the analyst can identify recurring themes, emerging day-residues, 
  * and persistent defense patterns that indicate deeply buried, unresolved unconscious complexes.
- * * Technical Design Considerations:
+ * 
+ * Technical & UI Design Considerations:
  * - Implements data extraction rendering patterns to visualize structured historical arrays.
  * - Features local UI state mapping to dynamically expand and examine specific past Freudian report nodes.
- * - Utilizes Tailwind utility frameworks to build an accessible, highly scannable visual layout.
+ * - Glassmorphic UI Integration: Applies translucent layering and luminous node markers to maintain 
+ * the immersive celestial theme without sacrificing data readability (NFR-003).
  */
 export default function HistoryDashboard({ onBackToInput }) {
   // Local state tracking which historical entry card is actively expanded for detailed review
@@ -56,17 +59,20 @@ export default function HistoryDashboard({ onBackToInput }) {
   };
 
   return (
-    <div className="w-full max-w-3xl bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+    /* 1. DASHBOARD WRAPPER: 
+       Utilizes the global .dream-card glassmorphism utility and an ethereal float.
+    */
+    <div className="w-full max-w-3xl dream-card ethereal-float overflow-hidden shadow-2xl">
       
       {/* Dashboard Top Identity Frame */}
-      <div className="bg-gradient-to-r from-purple-900 to-indigo-950 p-6 text-white flex justify-between items-center">
+      <div className="bg-black/30 backdrop-blur-md border-b border-white/10 p-6 text-white flex justify-between items-center z-10 relative">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Your Psychoanalytic Journal</h2>
-          <p className="text-xs text-purple-200 mt-1">Chronological Timeline of Subconscious Logs</p>
+          <h2 className="text-3xl font-bold tracking-tight drop-shadow-md">Your Psychoanalytic Journal</h2>
+          <p className="text-xs text-purple-300/80 mt-2">Chronological Timeline of Subconscious Logs</p>
         </div>
         <button
           onClick={onBackToInput}
-          className="px-4 py-2 bg-purple-700 bg-opacity-50 hover:bg-opacity-80 border border-purple-500 rounded-xl text-xs font-medium transition-all duration-150 cursor-pointer"
+          className="px-5 py-2.5 bg-purple-600/60 hover:bg-purple-500 border border-purple-400/50 rounded-xl text-sm font-medium transition-all duration-300 cursor-pointer shadow-[0_0_15px_rgba(168,85,247,0.3)] hover:shadow-[0_0_20px_rgba(168,85,247,0.6)]"
         >
           &larr; New Entry
         </button>
@@ -74,52 +80,59 @@ export default function HistoryDashboard({ onBackToInput }) {
 
       {/* Main Timeline List Container */}
       <div className="p-6 space-y-6">
-        <div className="relative border-l-2 border-purple-200 pl-6 ml-3 space-y-6">
+        {/* Timeline structural line: updated to a soft translucent purple */}
+        <div className="relative border-l border-purple-500/30 pl-6 ml-3 space-y-6">
           
           {mockHistoricalEntries.map((entry) => (
             <div key={entry.id} className="relative group">
               
-              {/* Timeline Indicator Node Bullet */}
-              <span className="absolute -left-[31px] top-1.5 bg-purple-600 w-4 h-4 rounded-full border-4 border-white group-hover:bg-indigo-600 transition-colors duration-150"></span>
+              {/* 2. GLOWING TIMELINE NODES:
+                 Replaced static grey/purple dots with glowing neon markers that illuminate further on hover.
+              */}
+              <span className="absolute -left-[30px] top-4 bg-purple-500 w-3.5 h-3.5 rounded-full border border-purple-200 shadow-[0_0_10px_rgba(168,85,247,0.8)] group-hover:bg-purple-300 group-hover:shadow-[0_0_15px_rgba(216,180,254,1)] transition-all duration-300"></span>
               
-              {/* Collapsible Card Element Wrapper */}
-              <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow duration-200">
+              {/* 3. COLLAPSIBLE CARD ELEMENT: 
+                 Translucent black plates (bg-black/20) replacing solid white boxes.
+              */}
+              <div className="bg-black/20 border border-white/10 rounded-2xl p-5 shadow-lg hover:bg-black/40 backdrop-blur-sm transition-all duration-300">
                 <div className="flex justify-between items-start cursor-pointer" onClick={() => toggleExpandEntry(entry.id)}>
-                  <div>
-                    <span className="text-xs font-bold text-purple-700 tracking-wider font-mono">
+                  <div className="pr-4">
+                    <span className="text-xs font-bold text-purple-300 tracking-wider font-mono drop-shadow-sm">
                       {entry.date}
                     </span>
-                    <h3 className="text-sm font-medium text-gray-800 mt-1 line-clamp-1 italic">
+                    <h3 className="text-md font-medium text-white mt-1.5 line-clamp-1 italic leading-relaxed">
                       "{entry.manifestSnippet}"
                     </h3>
                   </div>
-                  <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded border font-mono">
+                  {/* Mechanism Badge */}
+                  <span className="text-xs bg-purple-500/20 text-purple-200 px-3 py-1 rounded-full border border-purple-400/30 font-mono whitespace-nowrap shadow-inner">
                     {entry.mechanism}
                   </span>
                 </div>
 
                 {/* Conditional Expansion Drawer View Block */}
                 {expandedEntryId === entry.id && (
-                  <div className="mt-4 pt-4 border-t border-gray-100 space-y-3 animate-fadeIn">
+                  <div className="mt-5 pt-5 border-t border-white/10 space-y-4 animate-fadeIn">
                     <div>
-                      <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+                      <h4 className="text-xs font-bold text-purple-300/70 uppercase tracking-wider drop-shadow-sm">
                         Full Manifest Segment Snippet
                       </h4>
-                      <p className="text-sm text-gray-600 mt-1 italic leading-relaxed">
+                      <p className="text-sm text-gray-200 mt-1.5 italic leading-relaxed">
                         {entry.manifestSnippet}
                       </p>
                     </div>
 
-                    <div className="p-3 bg-purple-50 bg-opacity-40 rounded-lg border border-purple-100">
-                      <h4 className="text-xs font-bold text-purple-800 uppercase tracking-wider">
+                    {/* Latent Summary Insight Box */}
+                    <div className="p-4 bg-purple-900/20 rounded-xl border border-purple-400/20 shadow-inner">
+                      <h4 className="text-xs font-bold text-purple-300 uppercase tracking-wider drop-shadow-sm">
                         Latent Evaluation Translation Summary
                       </h4>
-                      <p className="text-sm text-gray-700 mt-1 leading-relaxed">
+                      <p className="text-sm text-purple-50 mt-2 leading-relaxed">
                         {entry.latentSummary}
                       </p>
                     </div>
 
-                    <div className="flex justify-between items-center pt-2 text-xs text-gray-400 font-mono">
+                    <div className="flex justify-between items-center pt-3 text-xs text-purple-300/50 font-mono border-t border-white/5 mt-4">
                       <span>Database ID: {entry.id}</span>
                       <span>Loop Sessions Completed: {entry.questionsAnswered}/3</span>
                     </div>
@@ -127,12 +140,12 @@ export default function HistoryDashboard({ onBackToInput }) {
                 )}
 
                 {/* Expand Toggle Button Prompt Area */}
-                <div className="mt-2 text-right">
+                <div className="mt-3 text-right">
                   <button
                     onClick={() => toggleExpandEntry(entry.id)}
-                    className="text-xs text-purple-600 hover:text-purple-800 font-medium underline cursor-pointer"
+                    className="text-xs text-purple-400 hover:text-purple-200 font-medium transition-colors cursor-pointer flex items-center justify-end w-full"
                   >
-                    {expandedEntryId === entry.id ? "Minimize Overview" : "Examine Deep Interpretation Report"}
+                    {expandedEntryId === entry.id ? "Collapse Record" : "Examine Deep Interpretation"}
                   </button>
                 </div>
 
@@ -145,7 +158,7 @@ export default function HistoryDashboard({ onBackToInput }) {
 
       {/* Empty Data Placeholder Safe Boundary Check */}
       {mockHistoricalEntries.length === 0 && (
-        <div className="p-12 text-center text-gray-400 text-sm">
+        <div className="p-12 text-center text-purple-300/50 text-sm font-mono">
           No entries recorded in this psychological ledger yet.
         </div>
       )}
