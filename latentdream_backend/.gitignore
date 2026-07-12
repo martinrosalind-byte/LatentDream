@@ -1,12 +1,47 @@
-# Ignore environment variables
-.env
+# =========================================================================
+# LATENTDREAM CONFIGURATION MANAGEMENT SYSTEM EXCLUSION MATRIX
+# Project Name: LatentDream Dream Analysis Application 
+# Student Name: Rosalind Barrett [cite: 4]
+# Student Number: 25115642 [cite: 5]
+# Cohort: HDAIML_SEP25OL [cite: 6]
+# =========================================================================
 
-# Ignore Python cache and virtual environments
+# --- SECURITY & ENVIRONMENT CREDENTIALS (CRITICAL SAFEGUARDS) ---
+# Blocks private API keys and database strings from leaking to public repos
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env
+*credentials*.json
+
+# --- LOCAL RUNTIME ASSETS & DATABASES (PRODUCTION ISOLATION) ---
+# Prevents volatile local database scratchpads from clashing with Cloud PostgreSQL [cite: 39]
+latentdream.db
+*.db
+*.sqlite3
+*.sqlite
+
+# --- PYTHON BACKEND RUNTIME EXCLUSIONS (FASTAPI / PYTEST) ---
+# Excludes compiled bytecode and caching structures used by PyTest and FastAPI [cite: 38, 46]
 __pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
 .venv/
 venv/
-.env/
+ENV/
+env/
 
-# Keep all other files (like your code)
-!*.py
-!*.md
+# --- NODE & UI FRONTEND RUNTIME EXCLUSIONS (REACT / VITE) ---
+# Filters out high-volume dependencies and compilation assets from React/Vercel pipelines [cite: 37]
+node_modules/
+dist/
+build/
+.cache/
+
+# --- OS TEMPORARY SYSTEM GARBAGE ---
+.DS_Store
+Thumbs.db
