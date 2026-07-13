@@ -71,7 +71,35 @@ llm = ChatGoogleGenerativeAI(
     temperature=0.4  # Lowered temperature to minimize speculative hallucinations and enforce accuracy
 )
 
-# Strict Freudian context guardrails to stop modern or unscientific ideas from leaking
+# ==============================================================================
+# 1. ORCHESTRATION PIPELINE: QUESTION GENERATOR (NEW)
+# ==============================================================================
+
+FREUDIAN_QUESTION_CONTEXT = (
+    "You are a clinical psychoanalyst strictly following Sigmund Freud's 'The Interpretation of Dreams'. "
+    "The user has shared a dream (manifest content) and you are currently in a free-association dialogue. "
+    "Based on the conversation so far, identify a single prominent symbol or emotional tone and ask ONE "
+    "pointed, brief question to uncover its latent meaning (e.g., childhood memories, repressed desires). "
+    "CRITICAL: Do not offer an interpretation yet. Only ask the next question. Maintain a clinical, neutral tone."
+)
+
+question_prompt_template = ChatPromptTemplate.from_messages([
+    ("system", FREUDIAN_QUESTION_CONTEXT),
+    (
+        "system", 
+        "Contextual Session Data:\n"
+        "Original Dream: {dream_text}\n"
+        "Conversation History:\n{transcript_text}"
+    ),
+    ("user", "Formulate the next Freudian free-association question based on my last response.")
+])
+
+freudian_question_chain = question_prompt_template | llm | StrOutputParser()
+
+# ==============================================================================
+# 2. ORCHESTRATION PIPELINE: FINAL REPORT GENERATOR (EXISTING)
+# ==============================================================================
+
 FREUDIAN_SYSTEM_CONTEXT = (
     "You are an expert clinical psychoanalyst operating strictly within the paradigm of classical Sigmund Freud theories "
     "as outlined in 'The Interpretation of Dreams' (1899). Your objective is to process a manifest dream narrative "
@@ -94,14 +122,65 @@ report_prompt_template = ChatPromptTemplate.from_messages([
     ("user", "Compile the final Freudian Interpretation Report following these exact requirements.")
 ])
 
-# LangChain Expression Language (LCEL) execution pipeline engine
 freudian_report_chain = report_prompt_template | llm | StrOutputParser()
 
+# ==============================================================================
+# DATA TRANSFER OBJECTS (DTOs)
+# ==============================================================================
+
+class ChatRequest(BaseModel):
+    """Data Transfer Object modeling the multi-turn dialogue state."""
+    dream_text: str
+    transcript: List[Dict[str, str]]
 
 class AnalysisRequest(BaseModel):
     """Data Transfer Object modeling incoming diagnostic evaluation payloads."""
     dream_text: str
     transcript: List[Dict[str, str]]
+
+# ==============================================================================
+# API ENDPOINTS
+# ==============================================================================
+
+@app.post("/api/chat")
+async def generate_next_question(request: ChatRequest):
+    """
+    HTTP POST Endpoint: Evaluates the current state of the session transcript.
+    Enforces the 3-question diagnostic boundary before releasing control.
+    """
+    # Count how many times the user has replied
+    user_responses = [msg for msg in request.transcript if msg.get("sender") == "user"]
+    turn_count = len(user_responses)
+    
+    # Structural Guardrail: Cap the loop at exactly 3 questions
+    if turn_count >= 3:
+        return {
+            "status": "complete", 
+            "message": "Diagnostic threshold reached. System is ready to invoke /api/analyze."
+        }
+        
+    # Formulate transcript matrix for the LLM context window
+    formatted_transcript = ""
+    for msg in request.transcript:
+        sender = "User" if msg.get("sender") == "user" else "Analyst (AI)"
+        formatted_transcript += f"{sender}: {msg.get('text')}\n"
+        
+    try:
+        next_question = freudian_question_chain.invoke({
+            "dream_text": request.dream_text,
+            "transcript_text": formatted_transcript
+        })
+        
+        return {
+            "status": "in_progress", 
+            "turn": turn_count + 1, 
+            "question": next_question
+        }
+    except Exception as error_exception:
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Generative Question Framework Error: {str(error_exception)}"
+        )
 
 
 @app.post("/api/analyze")
@@ -110,32 +189,28 @@ async def generate_interpretation(request: AnalysisRequest, db: Session = Depend
     HTTP POST Endpoint: Processes the complete session dataset through the LCEL AI chain,
     permanently flushes transaction data records to PostgreSQL, and returns the compiled text.
     """
-    # System boundary validation check
     if not request.dream_text.strip():
         raise HTTPException(status_code=400, detail="Network payload violation: Original manifest text is required.")
 
     try:
-        # Formulate a structured string block from the conversation history matrix
         formatted_transcript = ""
         for msg in request.transcript:
             sender = "User" if msg.get("sender") == "user" else "Analyst (AI)"
             formatted_transcript += f"{sender}: {msg.get('text')}\n"
 
-        # Execute the generative interpretation pipeline asynchronously
         interpretation_report = freudian_report_chain.invoke({
             "dream_text": request.dream_text,
             "transcript_text": formatted_transcript
         })
 
-        # Instantiate a data model entity record structure for persistent database saving
         db_record = models.DreamHistory(
             dream_text=request.dream_text,
             interpretation=interpretation_report
         )
         
-        db.add(db_record)        # Stage the new entry inside the database transaction
-        db.commit()              # Securely flush and save transaction states permanently
-        db.refresh(db_record)    # Fetch the unique auto-generated primary key identifier
+        db.add(db_record)        
+        db.commit()              
+        db.refresh(db_record)    
         
         return {
             "status": "success",
@@ -144,7 +219,7 @@ async def generate_interpretation(request: AnalysisRequest, db: Session = Depend
         }
         
     except Exception as error_exception:
-        db.rollback()  # Safely roll back transaction states to prevent data corruption on error
+        db.rollback()  
         raise HTTPException(
             status_code=500, 
             detail=f"Upstream Generative Framework Error: {str(error_exception)}"
@@ -155,7 +230,6 @@ async def generate_interpretation(request: AnalysisRequest, db: Session = Depend
 async def get_dream_history(db: Session = Depends(get_db)):
     """
     HTTP GET Endpoint: Retrieves archived records from the database sorted chronologically.
-    Feeds user logs directly into the frontend history component timeline.
     """
     try:
         history_records = db.query(models.DreamHistory).order_by(models.DreamHistory.created_at.desc()).all()
