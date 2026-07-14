@@ -12,6 +12,7 @@ import React from 'react';
  * Manifest Imagery, Unconscious Desires, and Ego Defenses to map out those hidden conflicts.
  * * Technical & UI Design Considerations:
  * - Implements a stateless functional component pattern, relying entirely on stable immutable props.
+ * - Integrates a prominent non-clinical advisory banner to reinforce the application's educational intent.
  * - Glassmorphic UI (NFR-003): Utilizes translucent Tailwind CSS grid structures to create highly scannable 
  * visual reporting panels that maintain visual immersion over the global celestial background.
  */
@@ -34,12 +35,19 @@ export default function DreamReport({ manifestContent, chatTranscript, liveRepor
        Applies the .dream-card frosted glass base and a subtle zero-gravity float 
        to match the overarching application aesthetic.
     */
-    <div className="w-full max-w-3xl dream-card ethereal-float overflow-hidden space-y-6 shadow-2xl">
+    <div className="w-full max-w-3xl dream-card ethereal-float overflow-hidden space-y-0 shadow-2xl relative">
       
+      {/* Non-Clinical Safety Disclaimer Banner */}
+      <div className="bg-amber-500/10 border-b border-amber-500/20 px-6 py-3 text-center">
+        <p className="text-sm text-amber-300 font-medium tracking-wide">
+          ✨ For reflection and self-exploration only &middot; Not clinical advice or mental health treatment
+        </p>
+      </div>
+
       {/* Report Header Block */}
       <div className="bg-black/30 backdrop-blur-md border-b border-white/10 p-6 text-white text-center">
         <span className="text-xs font-semibold uppercase tracking-widest text-purple-200 bg-purple-900/40 px-4 py-1.5 rounded-full border border-purple-500/30 shadow-inner">
-          Final Psychoanalytic Dossier
+          Your Dream Reflection Profile
         </span>
         <h2 className="text-3xl font-bold mt-4 tracking-tight drop-shadow-md">Latent Content Interpretation</h2>
         <p className="text-xs text-purple-300/60 mt-2">Generated via Historical Freudian Metrics</p>
@@ -60,7 +68,7 @@ export default function DreamReport({ manifestContent, chatTranscript, liveRepor
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="p-5 rounded-xl border border-purple-400/20 bg-purple-900/20 backdrop-blur-sm transition-all hover:bg-purple-900/30">
             <h4 className="text-xs font-bold text-purple-300 uppercase tracking-wider mb-3 drop-shadow-sm">
-              Clinical Summary Overview
+              Core Analytical Themes
             </h4>
             <p className="text-sm text-purple-50 leading-relaxed">
               {mockAnalysisReport.summary}
@@ -100,7 +108,7 @@ export default function DreamReport({ manifestContent, chatTranscript, liveRepor
         {/* Panel 4: Concluding Psychoanalytic Advice */}
         <div className="border-t border-white/10 pt-5">
           <h4 className="text-xs font-bold text-purple-300/70 uppercase tracking-wider mb-2 drop-shadow-sm">
-            Psychoanalytic Recommendation
+            Insights for Self-Reflection
           </h4>
           <p className="text-sm text-purple-100/90 leading-relaxed">
             {mockAnalysisReport.recommendation}
@@ -112,9 +120,9 @@ export default function DreamReport({ manifestContent, chatTranscript, liveRepor
           {/* LUMINOUS ACTION BUTTON: Matches the aesthetic of the Input phase submit button */}
           <button
             onClick={onReset}
-            className="w-full py-4 bg-purple-600/80 hover:bg-purple-500 text-white font-medium rounded-xl text-sm transition-all duration-300 shadow-[0_0_15px_rgba(168,85,247,0.3)] hover:shadow-[0_0_25px_rgba(168,85,247,0.6)] border border-purple-400/50"
+            className="w-full py-4 bg-purple-600/80 hover:bg-purple-500 text-white font-medium rounded-xl text-sm transition-all duration-300 shadow-[0_0_15px_rgba(168,85,247,0.3)] hover:shadow-[0_0_25px_rgba(168,85,247,0.6)] border border-purple-400/50 cursor-pointer"
           >
-            Log a New Manifest Dream Entry
+            Log a New Dream Entry
           </button>
         </div>
       </div>

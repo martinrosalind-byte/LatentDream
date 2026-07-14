@@ -2,20 +2,21 @@ import React, { useState } from 'react';
 
 /**
  * @file HistoryDashboard.jsx
- * @description Secure journal dashboard component mapping an empirical historical timeline of user dream submissions.
+ * @description Secure journal dashboard component mapping a historical timeline of user dream submissions.
  * This component satisfies Functional Requirement FR-008 (Secure Journal Dashboard) and complies with usability standards.
  * 
  * Theoretical Context:
- * In classical Freudian interpretation (Freud, 1899), analyzing isolated dream logs provides limited diagnostic value. 
- * True psychoanalytic discovery relies on evaluating structural repetitions across a prolonged longitudinal dataset. 
- * By tracking entries chronologically, the analyst can identify recurring themes, emerging day-residues, 
- * and persistent defense patterns that indicate deeply buried, unresolved unconscious complexes.
+ * In classical Freudian interpretation (Freud, 1899), analyzing isolated dream logs provides limited insight. 
+ * True self-discovery relies on evaluating structural repetitions across a prolonged dataset. 
+ * By tracking entries chronologically, the user can identify recurring themes, emerging day-residues, 
+ * and persistent defense patterns that indicate deeper, unresolved unconscious thoughts.
  * 
  * Technical & UI Design Considerations:
  * - Implements data extraction rendering patterns to visualize structured historical arrays.
- * - Features local UI state mapping to dynamically expand and examine specific past Freudian report nodes.
+ * - Features local UI state mapping to dynamically expand and examine specific past Freudian reflection nodes.
  * - Glassmorphic UI Integration: Applies translucent layering and luminous node markers to maintain 
- * the immersive celestial theme without sacrificing data readability (NFR-003).
+ *   the immersive celestial theme without sacrificing data readability (NFR-003).
+ * - Incorporates a visible, non-clinical advisory boundary to support ethical reflection guardrails.
  */
 export default function HistoryDashboard({ onBackToInput }) {
   // Local state tracking which historical entry card is actively expanded for detailed review
@@ -62,13 +63,20 @@ export default function HistoryDashboard({ onBackToInput }) {
     /* 1. DASHBOARD WRAPPER: 
        Utilizes the global .dream-card glassmorphism utility and an ethereal float.
     */
-    <div className="w-full max-w-3xl dream-card ethereal-float overflow-hidden shadow-2xl">
+    <div className="w-full max-w-3xl dream-card ethereal-float overflow-hidden shadow-2xl relative">
       
+      {/* Non-Clinical Safety Disclaimer Banner */}
+      <div className="bg-amber-500/10 border-b border-amber-500/20 px-6 py-3 text-center">
+        <p className="text-sm text-amber-300 font-medium tracking-wide">
+          ✨ For reflection and self-exploration only &middot; Not clinical advice or mental health treatment
+        </p>
+      </div>
+
       {/* Dashboard Top Identity Frame */}
       <div className="bg-black/30 backdrop-blur-md border-b border-white/10 p-6 text-white flex justify-between items-center z-10 relative">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight drop-shadow-md">Your Psychoanalytic Journal</h2>
-          <p className="text-xs text-purple-300/80 mt-2">Chronological Timeline of Subconscious Logs</p>
+          <h2 className="text-3xl font-bold tracking-tight drop-shadow-md">Your Dream Reflection Journal</h2>
+          <p className="text-xs text-purple-300/80 mt-2">A Timeline of Your Subconscious Journeys</p>
         </div>
         <button
           onClick={onBackToInput}
@@ -115,7 +123,7 @@ export default function HistoryDashboard({ onBackToInput }) {
                   <div className="mt-5 pt-5 border-t border-white/10 space-y-4 animate-fadeIn">
                     <div>
                       <h4 className="text-xs font-bold text-purple-300/70 uppercase tracking-wider drop-shadow-sm">
-                        Full Manifest Segment Snippet
+                        Full Dream Snippet
                       </h4>
                       <p className="text-sm text-gray-200 mt-1.5 italic leading-relaxed">
                         {entry.manifestSnippet}
@@ -125,7 +133,7 @@ export default function HistoryDashboard({ onBackToInput }) {
                     {/* Latent Summary Insight Box */}
                     <div className="p-4 bg-purple-900/20 rounded-xl border border-purple-400/20 shadow-inner">
                       <h4 className="text-xs font-bold text-purple-300 uppercase tracking-wider drop-shadow-sm">
-                        Latent Evaluation Translation Summary
+                        Insights into Latent Themes
                       </h4>
                       <p className="text-sm text-purple-50 mt-2 leading-relaxed">
                         {entry.latentSummary}
@@ -134,7 +142,7 @@ export default function HistoryDashboard({ onBackToInput }) {
 
                     <div className="flex justify-between items-center pt-3 text-xs text-purple-300/50 font-mono border-t border-white/5 mt-4">
                       <span>Database ID: {entry.id}</span>
-                      <span>Loop Sessions Completed: {entry.questionsAnswered}/3</span>
+                      <span>Questions Answered: {entry.questionsAnswered}/3</span>
                     </div>
                   </div>
                 )}
@@ -145,7 +153,7 @@ export default function HistoryDashboard({ onBackToInput }) {
                     onClick={() => toggleExpandEntry(entry.id)}
                     className="text-xs text-purple-400 hover:text-purple-200 font-medium transition-colors cursor-pointer flex items-center justify-end w-full"
                   >
-                    {expandedEntryId === entry.id ? "Collapse Record" : "Examine Deep Interpretation"}
+                    {expandedEntryId === entry.id ? "Close Reflection" : "Read Full Reflection"}
                   </button>
                 </div>
 
@@ -159,7 +167,7 @@ export default function HistoryDashboard({ onBackToInput }) {
       {/* Empty Data Placeholder Safe Boundary Check */}
       {mockHistoricalEntries.length === 0 && (
         <div className="p-12 text-center text-purple-300/50 text-sm font-mono">
-          No entries recorded in this psychological ledger yet.
+          You haven't logged any dreams yet.
         </div>
       )}
     </div>

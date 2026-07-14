@@ -14,6 +14,7 @@ import './index.css';
  * - Centralized State Controller: Maintains top-level data immutability for active session tracking.
  * - Glassmorphism UI Wrapper: Utilizes backdrop-filters and alpha-channel backgrounds for the header/footer.
  * - Reactive Error Isolation: Intercepts network disconnect anomalies to protect local view execution states.
+ * - Ethical Guardrails: Embeds a site-wide footer disclaimer clarifying the non-clinical nature of the app.
  */
 function App() {
   // Application execution stages: 'AUTH' | 'INPUT' | 'PROCESSING' | 'CHAT' | 'REPORT' | 'HISTORY'
@@ -60,8 +61,8 @@ function App() {
 
     try {
       // Execute live HTTP POST communication to the backend pipeline gateway
-      // Dynamically resolves to the cloud environment variable, falling back to the hardcoded Render URL
-      const backendUrl = import.meta.env.VITE_API_URL || 'https://latentdream.onrender.com';
+      // Dynamically resolves to the cloud environment variable, falling back to the local host
+      const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
       const response = await fetch(`${backendUrl}/api/analyze`, {
         method: 'POST',
         headers: {
@@ -88,7 +89,7 @@ function App() {
 
     } catch (error) {
       console.error("Network integration breakdown:", error);
-      setNetworkError('Failed to communicate with the Freudian analysis server. Please verify your FastAPI backend is running.');
+      setNetworkError('Failed to communicate with the analysis server. Please verify your FastAPI backend is running.');
       setCurrentStage('INPUT'); // Safe fallback transition to preserve user inputs
     }
   };
@@ -110,7 +111,7 @@ function App() {
       Replaces standard grey background with the animated CSS gradient mesh.
       Text is inverted to text-slate-100 to ensure high contrast against dark celestial colors.
     */
-    <div className="App antialiased text-slate-100 dream-viewport-bg flex flex-col justify-between font-sans relative">
+    <div className="App antialiased text-slate-100 dream-viewport-bg flex flex-col justify-between font-sans relative min-h-screen">
       
       {/* Universal Application Navigation Header Bar */}
       {currentStage !== 'AUTH' && (
@@ -141,7 +142,7 @@ function App() {
         </header>
       )}
 
-{/* Primary Reactive Application Content Switchboard */}
+      {/* Primary Reactive Application Content Switchboard */}
       <main key={currentStage} className="flex-grow flex items-center justify-center p-4 my-6 z-10 relative animate-fade-in">
         
         {/* Network Exception Alert Drawer Banner */}
@@ -179,9 +180,9 @@ function App() {
         {currentStage === 'PROCESSING' && (
           <div className="text-center space-y-5 animate-pulse ethereal-float">
             <div className="w-14 h-14 border-4 border-purple-400 border-t-transparent rounded-full animate-spin mx-auto drop-shadow-[0_0_15px_rgba(168,85,247,0.5)]"></div>
-            <h3 className="text-xl font-semibold text-white drop-shadow-md">Decomposing Manifest Content...</h3>
+            <h3 className="text-xl font-semibold text-white drop-shadow-md">Reflecting on Dream Elements...</h3>
             <p className="text-sm text-purple-200/70 max-w-sm mx-auto leading-relaxed">
-              Transmitting dataset over the network to trigger LangChain prompt routing and execute Gemini API symbol extraction.
+              Synthesizing your narrative and associations to generate personalized psychoanalytic insights.
             </p>
           </div>
         )}
@@ -194,7 +195,7 @@ function App() {
           />
         )}
 
-        {/* Stage 5: Live Psychoanalytic Diagnostic Outcome Panel */}
+        {/* Stage 5: Live Dream Reflection Panel */}
         {currentStage === 'REPORT' && (
           <DreamReport 
             manifestContent={manifestContent}
@@ -213,8 +214,13 @@ function App() {
       {/* Structural Academic Evaluation Identification Footer */}
       {currentStage !== 'AUTH' && (
         /* 4. FOOTER GLASSMORPHISM: Matches the translucent header aesthetic */
-        <footer className="w-full bg-black/20 backdrop-blur-md border-t border-white/10 py-4 text-center text-xs text-purple-200/50 z-10">
-          &copy; 2026 LatentDream Project &middot; National College of Ireland Portfolio.
+        <footer className="w-full bg-black/20 backdrop-blur-md border-t border-white/10 py-4 text-center z-10 flex flex-col space-y-1">
+          <span className="text-xs text-purple-200/50">
+            &copy; 2026 LatentDream Project &middot; National College of Ireland Portfolio.
+          </span>
+          <span className="text-[10px] text-amber-500/60 uppercase tracking-widest font-semibold">
+            For Reflection Only &middot; Not Clinical Advice
+          </span>
         </footer>
       )}
     </div>

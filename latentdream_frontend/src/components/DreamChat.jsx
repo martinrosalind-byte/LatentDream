@@ -2,18 +2,19 @@ import React, { useState, useEffect, useRef } from 'react';
 
 /**
  * @file DreamChat.jsx
- * @description Interactive chat interface component executing the iterative user interrogation loop.
- * This component satisfies Functional Requirement FR-005 by restricting the conversational loop to 
- * exactly three targeted, AI-generated prompts before advancing the data state.
- * * Theoretical Context:
+ * @description Interactive chat interface component executing the iterative user association loop.
+ * Satisfies Functional Requirement FR-005 by restricting the conversational loop to exactly three 
+ * targeted, AI-generated prompts, and introduces a visible non-clinical reflection disclaimer banner.
+ * * * Theoretical Context:
  * In line with Sigmund Freud’s "The Interpretation of Dreams" (1899), dream elements are highly personalized 
  * products of wish-fulfillment and psychic censorship. Rather than utilizing static dictionaries, 
  * this module leverages an active "Free Association" paradigm, querying the user's conscious waking life, 
  * recent day-residues, and dominant emotional baselines to unpack latent meanings.
- * * Technical Design Considerations:
+ * * * Technical Design Considerations:
  * - Employs a local state linear array to manage chat message components dynamically.
  * - Tracks iterative state progression through a bounded index counter (0 to 3) to enforce conversational limits.
  * - Integrates loading states to accommodate performance expectations outlined in NFR-001.
+ * - Integrates a prominent non-clinical advisory banner to maintain ethical safety guardrails.
  * - Uses an initialization reference flag to completely eliminate duplicate message side-effects during React StrictMode double-mount loops.
  */
 export default function DreamChat({ manifestContent, onChatComplete }) {
@@ -68,7 +69,7 @@ export default function DreamChat({ manifestContent, onChatComplete }) {
       if (data.status === 'in_progress') {
         setMessages(prev => [
           ...prev,
-          { sender: 'ai', text: data.question, timestamp: new Date() }
+          ...data.question ? [{ sender: 'ai', text: data.question, timestamp: new Date() }] : []
         ]);
       } else if (data.status === 'complete') {
         // Safe terminal barrier fallback: triggers if backend flags threshold completion
@@ -80,7 +81,7 @@ export default function DreamChat({ manifestContent, onChatComplete }) {
         ...prev,
         { 
           sender: 'ai', 
-          text: "An error occurred fetching the next clinical prompt. Please verify your FastAPI backend service is functional.", 
+          text: "An error occurred fetching the next reflective question. Please verify your FastAPI backend service is functional.", 
           timestamp: new Date() 
         }
       ]);
@@ -99,7 +100,7 @@ export default function DreamChat({ manifestContent, onChatComplete }) {
     const baselineHistory = [
       { 
         sender: 'ai', 
-        text: `I have received your manifest dream content. Let us look beyond the surface imagery to find the latent thoughts. I will ask you exactly three contextual questions to explore your associations.`, 
+        text: `I have received your dream details. Let us look beyond the surface imagery to find its deeper, personal meanings. I will ask you exactly three reflective questions to explore your personal associations.`, 
         timestamp: new Date() 
       }
     ];
@@ -141,16 +142,23 @@ export default function DreamChat({ manifestContent, onChatComplete }) {
   };
 
   return (
-    <div className="w-full max-w-2xl dream-card overflow-hidden flex flex-col h-[550px] shadow-2xl">
+    <div className="w-full max-w-2xl dream-card overflow-hidden flex flex-col h-[580px] shadow-2xl relative">
       
+      {/* Non-Clinical Safety Disclaimer Banner */}
+      <div className="bg-amber-500/10 border-b border-amber-500/20 px-4 py-2 text-center">
+        <p className="text-xs text-amber-300 font-medium tracking-wide">
+          ✨ For reflection and self-exploration only &middot; Not clinical advice or mental health treatment
+        </p>
+      </div>
+
       {/* Interactive Session Info Header */}
       <div className="bg-purple-950/40 backdrop-blur-md border-b border-white/10 p-4 text-white flex justify-between items-center">
         <div>
-          <h3 className="font-semibold text-lg tracking-tight drop-shadow-md">Psychoanalytic Exploration</h3>
-          <p className="text-xs text-purple-300/70">Methodology: Classical Freudian (1899)</p>
+          <h3 className="font-semibold text-base tracking-tight drop-shadow-md">Dream Reflection &amp; Association</h3>
+          <p className="text-xs text-purple-300/70">Concept: Classical Freudian Free Association (1899)</p>
         </div>
         <div className="text-xs bg-purple-500/20 border border-purple-400/30 px-3 py-1 rounded-full font-mono shadow-inner">
-          Progress: Q-{Math.min(questionIndex + 1, 3)} / 3
+          Progress: Question {Math.min(questionIndex + 1, 3)} of 3
         </div>
       </div>
 
@@ -190,7 +198,7 @@ export default function DreamChat({ manifestContent, onChatComplete }) {
           value={inputReply}
           onChange={(e) => setInputReply(e.target.value)}
           disabled={isAiTyping}
-          placeholder={isAiTyping ? "AI is processing concepts..." : "Type your honest thoughts here..."}
+          placeholder={isAiTyping ? "AI is processing your reflections..." : "Type your honest thoughts and memories here..."}
           className="flex-grow px-4 py-3 border border-white/10 bg-black/40 text-white placeholder-purple-300/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-400 disabled:bg-white/5 disabled:text-purple-300/40 text-sm transition-all duration-300"
         />
         <button
