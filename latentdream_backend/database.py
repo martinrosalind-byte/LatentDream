@@ -1,8 +1,17 @@
 """
 Filename: database.py
-Author: Rosalind Barrett
-Description: Database connection infrastructure utilizing SQLAlchemy Object-Relational 
-             Mapping (ORM). Establishes connection engines and transactional session factories.
+Author: Rosalind Barrett (Student ID: 25115642)
+Institution: National College of Ireland
+
+Description:
+    Database connection infrastructure utilizing SQLAlchemy Object-Relational 
+    Mapping (ORM). Establishes connection engines, session factories, and context
+    providers to handle PostgreSQL transactions securely (NFR-002).
+
+Academic Note:
+    To support portable academic testing, the connection string defaults to a local 
+    SQLite file if the PostgreSQL environment variable is absent. This isolates test 
+    database execution states while remaining ready for a cloud PostgreSQL launch in production.
 """
 
 import os
@@ -13,32 +22,28 @@ from sqlalchemy.orm import sessionmaker
 
 load_dotenv()
 
-# ACADEMIC ENVIRONMENT INTEGRATION:
-# Retrieves the connection string from environment variables. 
-# Defaults to a local SQLite configuration for localized academic evaluation portability.
+# Retrieves connection string with portable SQLite fallback configuration
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./latentdream.db")
 
-# Creation of the core database engine interface connection
-# 'connect_args' configuration is specific to SQLite thread boundary management
+# Thread safety management configuration for local development / testing
 if DATABASE_URL.startswith("sqlite"):
     engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 else:
     engine = create_engine(DATABASE_URL)
 
-# SessionLocal class serves as the concrete factory for transactional database connections
+# Concrete factory for database session contexts
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# Declarative base class binds database schemas directly to Python object states
+# Base class for declarative mapping schemas
 Base = declarative_base()
 
 def get_db():
     """
-    Dependency provider yielding an isolated database session context.
-    Ensures safe transactional lifecycle teardown upon request completion.
+    Dependency injector yielding an isolated database session.
+    Ensures safe, atomic transactional cleanups and closes connections on teardown.
     """
     db = SessionLocal()
     try:
         yield db
     finally:
         db.close()
-        
