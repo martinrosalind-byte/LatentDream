@@ -1,78 +1,73 @@
-import React, { useState } from 'react';
-
 /**
  * @file HistoryDashboard.jsx
- * @description Secure journal dashboard component mapping a historical timeline of user dream submissions.
- * This component satisfies Functional Requirement FR-008 (Secure Journal Dashboard) and complies with usability standards.
- * 
- * Theoretical Context:
- * In classical Freudian interpretation (Freud, 1899), analyzing isolated dream logs provides limited insight. 
- * True self-discovery relies on evaluating structural repetitions across a prolonged dataset. 
- * By tracking entries chronologically, the user can identify recurring themes, emerging day-residues, 
- * and persistent defense patterns that indicate deeper, unresolved unconscious thoughts.
- * 
- * Technical & UI Design Considerations:
- * - Implements data extraction rendering patterns to visualize structured historical arrays.
- * - Features local UI state mapping to dynamically expand and examine specific past Freudian reflection nodes.
- * - Glassmorphic UI Integration: Applies translucent layering and luminous node markers to maintain 
- *   the immersive celestial theme without sacrificing data readability (NFR-003).
- * - Incorporates a visible, non-clinical advisory boundary to support ethical reflection guardrails.
+ * @description Chronological ledger timeline visualizing archived dream interpretations.
+ * * Academic & Psychoanalytic Alignment:
+ * This dashboard directly delivers Functional Requirement FR-008 (Secure Journal Dashboard).
+ * In classical Freudian psychoanalysis (Freud, 1899), isolated dream logs contain limited clinical utility.
+ * Genuine self-discovery relies on tracking systemic, repetitive compromises over long-term timelines.
+ * Providing users with an organized history interface helps expose recurring dream-work patterns,
+ * day-residues, and persistent superego censorship techniques that they can study over time.
+ * * Technical Design Patterns:
+ * - Executes asynchronous HTTP GET requests to the FastAPI /api/history endpoint on component mount.
+ * - Visualizes persistent arrays returned from the SQLAlchemy/PostgreSQL storage layer.
+ * - Implements dynamic accordion-style drawers via local state toggling for granular, detailed analysis reviews.
  */
+
+import React, { useState, useEffect } from 'react';
+
 export default function HistoryDashboard({ onBackToInput }) {
-  // Local state tracking which historical entry card is actively expanded for detailed review
   const [expandedEntryId, setExpandedEntryId] = useState(null);
+  const [historicalEntries, setHistoricalEntries] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Mock array simulating real database rows pulled from the encrypted PostgreSQL logging schema
-  const mockHistoricalEntries = [
-    {
-      id: "dream_001",
-      date: "03-Jul-2026",
-      manifestSnippet: "I was running down a long corridor trying to find an exit, but the doors were all locked...",
-      latentSummary: "Indicates severe waking anxiety or repression regarding an immediate personal or academic milestone constraint.",
-      mechanism: "Displacement",
-      questionsAnswered: 3
-    },
-    {
-      id: "dream_002",
-      date: "28-Jun-2026",
-      manifestSnippet: "A giant shadow figure was offering me an old brass key in the middle of an open desert field...",
-      latentSummary: "Symbolic compromise-formation representing a hidden urge for autonomy and unlocking unconscious desires.",
-      mechanism: "Condensation",
-      questionsAnswered: 3
-    },
-    {
-      id: "dream_003",
-      date: "15-Jun-2026",
-      manifestSnippet: "I was flying over a vast ocean quite effortlessly, looking down at ships moving backward...",
-      latentSummary: "Classic regressive wish-fulfillment escape fantasy protecting the conscious ego from deep exhaustion stresses.",
-      mechanism: "Wish-Fulfillment",
-      questionsAnswered: 3
-    }
-  ];
+  // Resolves the backend URL dynamically
+  const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
-  /**
-   * @function toggleExpandEntry
-   * @description Modifies local state variables to expand or collapse specific journal logs.
-   * @param {string} id - The unique record ID of the targeted dream entry.
-   */
+  // Lifecycle hook: Fetches real database records when the dashboard loads
+  useEffect(() => {
+    const fetchHistory = async () => {
+      try {
+        const response = await fetch(`${backendUrl}/api/history`);
+        if (!response.ok) {
+          throw new Error('Failed to retrieve journal history from the server.');
+        }
+        const data = await response.json();
+        setHistoricalEntries(data);
+      } catch (err) {
+        console.error("Database sync error:", err);
+        setError("Unable to load your dream journal at this time. Please check your connection.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchHistory();
+  }, [backendUrl]);
+
   const toggleExpandEntry = (id) => {
     setExpandedEntryId(expandedEntryId === id ? null : id);
   };
 
+  // Helper function to safely render the formatted HTML paragraphs from the database string
+  const renderFormattedText = (text) => {
+    if (!text) return null;
+    return text.split('\n\n').map((paragraph, index) => (
+      <p key={index} className="text-sm text-purple-50 mt-2 leading-relaxed">
+        {paragraph.replace(/\*\*/g, '')}
+      </p>
+    ));
+  };
+
   return (
-    /* 1. DASHBOARD WRAPPER: 
-       Utilizes the global .dream-card glassmorphism utility and an ethereal float.
-    */
     <div className="w-full max-w-3xl dream-card ethereal-float overflow-hidden shadow-2xl relative">
       
-      {/* Non-Clinical Safety Disclaimer Banner */}
       <div className="bg-amber-500/10 border-b border-amber-500/20 px-6 py-3 text-center">
         <p className="text-sm text-amber-300 font-medium tracking-wide">
           ✨ For reflection and self-exploration only &middot; Not clinical advice or mental health treatment
         </p>
       </div>
 
-      {/* Dashboard Top Identity Frame */}
       <div className="bg-black/30 backdrop-blur-md border-b border-white/10 p-6 text-white flex justify-between items-center z-10 relative">
         <div>
           <h2 className="text-3xl font-bold tracking-tight drop-shadow-md">Your Dream Reflection Journal</h2>
@@ -86,90 +81,91 @@ export default function HistoryDashboard({ onBackToInput }) {
         </button>
       </div>
 
-      {/* Main Timeline List Container */}
-      <div className="p-6 space-y-6">
-        {/* Timeline structural line: updated to a soft translucent purple */}
-        <div className="relative border-l border-purple-500/30 pl-6 ml-3 space-y-6">
-          
-          {mockHistoricalEntries.map((entry) => (
-            <div key={entry.id} className="relative group">
-              
-              {/* 2. GLOWING TIMELINE NODES:
-                 Replaced static grey/purple dots with glowing neon markers that illuminate further on hover.
-              */}
-              <span className="absolute -left-[30px] top-4 bg-purple-500 w-3.5 h-3.5 rounded-full border border-purple-200 shadow-[0_0_10px_rgba(168,85,247,0.8)] group-hover:bg-purple-300 group-hover:shadow-[0_0_15px_rgba(216,180,254,1)] transition-all duration-300"></span>
-              
-              {/* 3. COLLAPSIBLE CARD ELEMENT: 
-                 Translucent black plates (bg-black/20) replacing solid white boxes.
-              */}
-              <div className="bg-black/20 border border-white/10 rounded-2xl p-5 shadow-lg hover:bg-black/40 backdrop-blur-sm transition-all duration-300">
-                <div className="flex justify-between items-start cursor-pointer" onClick={() => toggleExpandEntry(entry.id)}>
-                  <div className="pr-4">
-                    <span className="text-xs font-bold text-purple-300 tracking-wider font-mono drop-shadow-sm">
-                      {entry.date}
-                    </span>
-                    <h3 className="text-md font-medium text-white mt-1.5 line-clamp-1 italic leading-relaxed">
-                      "{entry.manifestSnippet}"
-                    </h3>
-                  </div>
-                  {/* Mechanism Badge */}
-                  <span className="text-xs bg-purple-500/20 text-purple-200 px-3 py-1 rounded-full border border-purple-400/30 font-mono whitespace-nowrap shadow-inner">
-                    {entry.mechanism}
-                  </span>
-                </div>
+      <div className="p-6 space-y-6 min-h-[300px]">
+        {/* Loading State UI */}
+        {isLoading && (
+          <div className="flex flex-col items-center justify-center py-12 space-y-4">
+             <div className="w-10 h-10 border-4 border-purple-400 border-t-transparent rounded-full animate-spin"></div>
+             <p className="text-purple-300/70 text-sm">Retrieving your subconscious archives...</p>
+          </div>
+        )}
 
-                {/* Conditional Expansion Drawer View Block */}
-                {expandedEntryId === entry.id && (
-                  <div className="mt-5 pt-5 border-t border-white/10 space-y-4 animate-fadeIn">
-                    <div>
-                      <h4 className="text-xs font-bold text-purple-300/70 uppercase tracking-wider drop-shadow-sm">
-                        Full Dream Snippet
-                      </h4>
-                      <p className="text-sm text-gray-200 mt-1.5 italic leading-relaxed">
-                        {entry.manifestSnippet}
-                      </p>
-                    </div>
+        {/* Error State UI */}
+        {error && !isLoading && (
+          <div className="bg-red-900/40 border border-red-500/30 p-4 rounded-xl text-red-200 text-sm text-center">
+            {error}
+          </div>
+        )}
 
-                    {/* Latent Summary Insight Box */}
-                    <div className="p-4 bg-purple-900/20 rounded-xl border border-purple-400/20 shadow-inner">
-                      <h4 className="text-xs font-bold text-purple-300 uppercase tracking-wider drop-shadow-sm">
-                        Insights into Latent Themes
-                      </h4>
-                      <p className="text-sm text-purple-50 mt-2 leading-relaxed">
-                        {entry.latentSummary}
-                      </p>
-                    </div>
-
-                    <div className="flex justify-between items-center pt-3 text-xs text-purple-300/50 font-mono border-t border-white/5 mt-4">
-                      <span>Database ID: {entry.id}</span>
-                      <span>Questions Answered: {entry.questionsAnswered}/3</span>
+        {/* Timeline Visualization */}
+        {!isLoading && !error && historicalEntries.length > 0 && (
+          <div className="relative border-l border-purple-500/30 pl-6 ml-3 space-y-6">
+            {historicalEntries.map((entry) => (
+              <div key={entry.id} className="relative group animate-fadeIn">
+                
+                {/* Glowing Timeline Node */}
+                <span className="absolute -left-[30px] top-4 bg-purple-500 w-3.5 h-3.5 rounded-full border border-purple-200 shadow-[0_0_10px_rgba(168,85,247,0.8)] group-hover:bg-purple-300 transition-all duration-300"></span>
+                
+                <div className="bg-black/20 border border-white/10 rounded-2xl p-5 shadow-lg hover:bg-black/40 backdrop-blur-sm transition-all duration-300">
+                  <div className="flex justify-between items-start cursor-pointer" onClick={() => toggleExpandEntry(entry.id)}>
+                    <div className="pr-4">
+                      <span className="text-xs font-bold text-purple-300 tracking-wider font-mono drop-shadow-sm">
+                        {new Date(entry.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                      </span>
+                      <h3 className="text-md font-medium text-white mt-1.5 line-clamp-1 italic leading-relaxed">
+                        "{entry.dream_text.substring(0, 80)}..."
+                      </h3>
                     </div>
                   </div>
-                )}
 
-                {/* Expand Toggle Button Prompt Area */}
-                <div className="mt-3 text-right">
-                  <button
-                    onClick={() => toggleExpandEntry(entry.id)}
-                    className="text-xs text-purple-400 hover:text-purple-200 font-medium transition-colors cursor-pointer flex items-center justify-end w-full"
-                  >
-                    {expandedEntryId === entry.id ? "Close Reflection" : "Read Full Reflection"}
-                  </button>
+                  {expandedEntryId === entry.id && (
+                    <div className="mt-5 pt-5 border-t border-white/10 space-y-4">
+                      <div>
+                        <h4 className="text-xs font-bold text-purple-300/70 uppercase tracking-wider drop-shadow-sm">
+                          Full Dream Snippet
+                        </h4>
+                        <p className="text-sm text-gray-200 mt-1.5 italic leading-relaxed">
+                          {entry.dream_text}
+                        </p>
+                      </div>
+
+                      <div className="p-4 bg-purple-900/20 rounded-xl border border-purple-400/20 shadow-inner">
+                        <h4 className="text-xs font-bold text-purple-300 uppercase tracking-wider drop-shadow-sm border-b border-purple-500/30 pb-2 mb-3">
+                          Psychoanalytic Synthesis
+                        </h4>
+                        <div className="prose prose-invert max-w-none">
+                          {renderFormattedText(entry.interpretation)}
+                        </div>
+                      </div>
+
+                      <div className="flex justify-between items-center pt-3 text-xs text-purple-300/50 font-mono border-t border-white/5 mt-4">
+                        <span>Database ID: #{entry.id}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="mt-3 text-right">
+                    <button
+                      onClick={() => toggleExpandEntry(entry.id)}
+                      className="text-xs text-purple-400 hover:text-purple-200 font-medium transition-colors cursor-pointer flex items-center justify-end w-full"
+                    >
+                      {expandedEntryId === entry.id ? "Close Reflection" : "Read Full Reflection"}
+                    </button>
+                  </div>
+
                 </div>
-
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
+        )}
 
-        </div>
+        {/* Empty State UI */}
+        {!isLoading && !error && historicalEntries.length === 0 && (
+          <div className="p-12 text-center text-purple-300/50 text-sm font-mono">
+            You haven't logged any dreams yet. Your timeline will appear here once you complete an analysis.
+          </div>
+        )}
       </div>
-
-      {/* Empty Data Placeholder Safe Boundary Check */}
-      {mockHistoricalEntries.length === 0 && (
-        <div className="p-12 text-center text-purple-300/50 text-sm font-mono">
-          You haven't logged any dreams yet.
-        </div>
-      )}
     </div>
   );
 }
