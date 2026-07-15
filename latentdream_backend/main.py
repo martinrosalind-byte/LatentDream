@@ -161,7 +161,7 @@ class AnalysisRequest(BaseModel):
 # ==============================================================================
 
 @app.post("/api/chat")
-async def generate_next_question(request: ChatRequest):
+def generate_next_question(request: ChatRequest):
     """
     HTTP POST Endpoint: Manages the active free-association transcript sequence.
     Enforces the clinical boundary of exactly three follow-up questions (FR-005).
@@ -201,7 +201,7 @@ async def generate_next_question(request: ChatRequest):
 
 
 @app.post("/api/analyze")
-async def generate_interpretation(request: AnalysisRequest, db: Session = Depends(get_db)):
+def generate_interpretation(request: AnalysisRequest, db: Session = Depends(get_db)):
     """
     HTTP POST Endpoint: Processes the compiled dream and free-association dialogue (FR-006),
     saves the transaction history to PostgreSQL (FR-007), and returns the finalized report.
