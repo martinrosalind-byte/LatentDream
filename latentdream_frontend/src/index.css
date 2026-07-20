@@ -4,6 +4,9 @@
  * framework engine to compile utility layout tokens across the 
  * client interface hierarchy, followed by custom application-specific 
  * aesthetic overrides.
+ * @note Modifications applied to support enhanced physical glassmorphism, 
+ * aligning the visual environment with the NFR-003 usability targets to 
+ * ensure an unobtrusive experience during manifest dream logging.
  */
 
 @import "tailwindcss";
@@ -22,7 +25,14 @@
 .dream-viewport-bg {
   min-height: 100vh;
   width: 100%;
-  background: linear-gradient(-45deg, #090d16, #1e1b4b, #111827, #2e1065);
+  
+  /* Sub-Surface Geometry: Integrates ambient radial gradients to simulate 
+     slow-moving celestial light orbs, overlaid on a dynamic linear gradient mesh. */
+  background: 
+    radial-gradient(circle at 15% 50%, rgba(255, 255, 255, 0.04), transparent 50%),
+    radial-gradient(circle at 85% 30%, rgba(255, 255, 255, 0.03), transparent 50%),
+    linear-gradient(-45deg, #090d16, #1e1b4b, #111827, #2e1065);
+    
   background-size: 400% 400%;
   animation: celestialShift 18s ease infinite;
   color: #f8fafc;
@@ -37,14 +47,24 @@
 }
 
 /* 2. GLASSMORPHIC CONTAINER LAYER (FROSTED GLASS)
-   Implements multi-layered backdrop filtration and subtle alpha-channel borders
-   to emphasize depth and suspension over the changing background environment.
+   Implements multi-layered backdrop filtration and directional alpha-channel 
+   borders to emphasize depth and suspension over the changing background environment.
 */
 .dream-card {
-  background: rgba(255, 255, 255, 0.03);
+  /* Card Opacity & Saturation: Elevated baseline background fill to 0.08 
+     to increase refraction visibility against the dark viewport mesh. */
+  background: rgba(255, 255, 255, 0.08);
+  
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px); /* Fallback configuration for Safari WebKit */
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  
+  /* Directional Edge Lighting: Establishes top and left bevel highlights to 
+     replace the uniform structural border, mimicking physical glass refraction. */
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  border-left: 1px solid rgba(255, 255, 255, 0.15);
+  border-right: 1px solid rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+  
   border-radius: 20px;
   box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.3);
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
