@@ -2,19 +2,22 @@ import React, { useState, useEffect, useRef } from 'react';
 
 /**
  * @file DreamChat.jsx
- * @description Dynamic chat interface handling free-association questions.
- * Enforces a strict boundary of exactly three follow-up prompts (FR-005)[cite: 3].
+ * @description Dynamic chat interface handling the Freudian free-association dialogue.
  * 
  * Psychoanalytic Alignment:
- * Traditional psychoanalysis avoids universal dream symbol definitions (Freud, 1899). 
- * Instead, this module uses "Free Association" to collect the dreamer's personal memories, 
- * day-residues, and emotions. By exploring associations dynamically, it bypasses rigid 
- * dictionary lookups to reveal personalized latent meanings.
+ * In accordance with classical Freudian psychoanalytic theory, this module completely 
+ * bypasses unscientific, rigid dream dictionaries. Instead, it guides the user through 
+ * "Free Association" to uncover personal memories, day-residues, and dominant emotions 
+ * attached to the manifest content.
  * 
- * Technical Design:
- * - Employs a linear message array to manage the conversational dashboard layout.
- * - Tracks turns with a bounded counter (0 to 3) to enforce session constraints.
- * - Uses a React `useRef` guard to block double-triggers during React 19 StrictMode mounting.
+ * Technical Design & Requirements Integration:
+ * - Enforces a strict conversational boundary of exactly three follow-up prompts to 
+ *   satisfy requirement FR-005.
+ * - Monitors the dialogue state using a bounded counter; upon reaching the threshold, 
+ *   it triggers the generation of the final interpretation report, satisfying FR-006.
+ * - Utilises React `useRef` to prevent duplicate initialization during StrictMode mounting.
+ * - Implements translucent glassmorphism UI utilities (Tailwind CSS) to support the 
+ *   calming, non-distracting visual environment mandated by NFR-003.
  */
 export default function DreamChat({ manifestContent, onChatComplete }) {
   const [questionIndex, setQuestionIndex] = useState(0);
@@ -25,6 +28,12 @@ export default function DreamChat({ manifestContent, onChatComplete }) {
 
   const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
+  /**
+   * Transmits the current conversational transcript to the AI backend to fetch 
+   * the next Freudian free-association question.
+   * 
+   * @param {Array} currentHistory - The chronological array of user and AI messages.
+   */
   const queryNextQuestion = async (currentHistory) => {
     setIsAiTyping(true);
     try {
@@ -58,13 +67,21 @@ export default function DreamChat({ manifestContent, onChatComplete }) {
       console.error("Dialogue sync error:", error);
       setMessages(prev => [
         ...prev,
-        { sender: 'ai', text: "An error occurred fetching the next question. Please verify your backend API.", timestamp: new Date() }
+        { 
+          sender: 'ai', 
+          text: "An error occurred fetching the next question. Please verify your backend API.", 
+          timestamp: new Date() 
+        }
       ]);
     } finally {
       setIsAiTyping(false);
     }
   };
 
+  /**
+   * Initializes the chat interface with a simple, accessible greeting that explains 
+   * the free-association process without using dense psychological jargon.
+   */
   useEffect(() => {
     if (effectInitialized.current) return;
     effectInitialized.current = true;
@@ -72,7 +89,7 @@ export default function DreamChat({ manifestContent, onChatComplete }) {
     const baselineHistory = [
       { 
         sender: 'ai', 
-        text: `I have received your dream details. Let us look beyond the surface imagery to find its deeper, personal meanings. I will ask you exactly three reflective questions to explore your personal associations.`, 
+        text: `I have your dream details. Let's look beyond the surface to find its personal meaning. I will ask you three simple questions about your feelings and memories to help uncover what this dream means for you.`, 
         timestamp: new Date() 
       }
     ];
@@ -80,6 +97,10 @@ export default function DreamChat({ manifestContent, onChatComplete }) {
     queryNextQuestion(baselineHistory);
   }, []);
 
+  /**
+   * Processes the user's free-association input, updates the transcript matrix, 
+   * and evaluates whether the three-question boundary has been reached.
+   */
   const handleSendMessage = (e) => {
     e.preventDefault();
     if (!inputReply.trim() || isAiTyping) return;
@@ -92,10 +113,12 @@ export default function DreamChat({ manifestContent, onChatComplete }) {
     const nextIndex = questionIndex + 1;
     setQuestionIndex(nextIndex);
 
+    // FR-006 Verification: Elevates the complete dialogue to the parent component 
+    // to generate the final Freudian interpretation report once 3 questions are answered.
     if (nextIndex >= 3) {
       setIsAiTyping(true);
       setTimeout(() => {
-        onChatComplete(updatedHistory); // Elevates the complete dialogue to generate the final report (FR-006)
+        onChatComplete(updatedHistory); 
       }, 1000);
     } else {
       queryNextQuestion(updatedHistory);
@@ -145,13 +168,19 @@ export default function DreamChat({ manifestContent, onChatComplete }) {
       </div>
 
       <form onSubmit={handleSendMessage} className="p-3 bg-black/30 border-t border-white/10 flex space-x-2">
+        {/* 
+          * UI Refraction Update (NFR-003): 
+          * Swapped opaque dark-fill (bg-black/40) for translucent frosted glass utilities 
+          * (bg-white/5, backdrop-blur-md) to align the interactive chat input with the 
+          * overarching application aesthetic.
+          */}
         <input
           type="text"
           value={inputReply}
           onChange={(e) => setInputReply(e.target.value)}
           disabled={isAiTyping}
           placeholder={isAiTyping ? "AI is processing your reflections..." : "Type your honest thoughts and memories here..."}
-          className="flex-grow px-4 py-3 border border-white/10 bg-black/40 text-white placeholder-purple-300/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 disabled:bg-white/5 disabled:text-purple-300/40 text-sm transition-all duration-300"
+          className="flex-grow px-4 py-3 border border-white/10 bg-white/5 backdrop-blur-md text-white placeholder-purple-300/30 rounded-xl focus:outline-none focus:border-white/30 disabled:bg-white/5 disabled:text-purple-300/40 text-sm transition-all duration-300"
         />
         <button
           type="submit"

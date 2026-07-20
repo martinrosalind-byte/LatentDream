@@ -1,20 +1,23 @@
+import React, { useState, useEffect } from 'react';
+
 /**
  * @file HistoryDashboard.jsx
  * @description Chronological ledger timeline visualizing archived dream interpretations.
- * * Academic & Psychoanalytic Alignment:
- * This dashboard directly delivers Functional Requirement FR-008 (Secure Journal Dashboard).
- * In classical Freudian psychoanalysis (Freud, 1899), isolated dream logs contain limited clinical utility.
- * Genuine self-discovery relies on tracking systemic, repetitive compromises over long-term timelines.
- * Providing users with an organized history interface helps expose recurring dream-work patterns,
- * day-residues, and persistent superego censorship techniques that they can study over time.
- * * Technical Design Patterns:
- * - Executes asynchronous HTTP GET requests to the FastAPI /api/history endpoint on component mount.
- * - Visualizes persistent arrays returned from the SQLAlchemy/PostgreSQL storage layer.
- * - Implements dynamic accordion-style drawers via local state toggling for granular, detailed analysis reviews.
+ * 
+ * Academic & Psychoanalytic Alignment:
+ * This component directly satisfies Functional Requirement FR-008 (Secure Journal Dashboard) by 
+ * providing users with a timeline of their past entries. In classical Freudian 
+ * psychoanalysis, isolated dream logs contain limited clinical utility[cite: 1]. Genuine 
+ * self-discovery relies on tracking systemic, repetitive compromises over long-term timelines to 
+ * expose recurring patterns and persistent hidden desires[cite: 1]. 
+ * 
+ * Technical Design Architecture:
+ * - Executes asynchronous HTTP GET requests to the FastAPI backend on component mount.
+ * - Visualizes persistent array payloads returned from the PostgreSQL storage layer, 
+ *   supporting the NFR-002 security requirement for encrypted, isolated user data[cite: 2].
+ * - Implements dynamic accordion-style drawers via local state toggling to satisfy NFR-003, 
+ *   ensuring the interface remains uncluttered and highly usable[cite: 2].
  */
-
-import React, { useState, useEffect } from 'react';
-
 export default function HistoryDashboard({ onBackToInput }) {
   const [expandedEntryId, setExpandedEntryId] = useState(null);
   const [historicalEntries, setHistoricalEntries] = useState([]);
@@ -62,16 +65,17 @@ export default function HistoryDashboard({ onBackToInput }) {
   return (
     <div className="w-full max-w-3xl dream-card ethereal-float overflow-hidden shadow-2xl relative">
       
+      {/* Ethical Safety Boundary: Non-Clinical Research Disclaimer */}
       <div className="bg-amber-500/10 border-b border-amber-500/20 px-6 py-3 text-center">
         <p className="text-sm text-amber-300 font-medium tracking-wide">
-          ✨ For reflection and self-exploration only &middot; Not clinical advice or mental health treatment
+          ✨ For personal reflection only &middot; Not medical advice or mental health treatment
         </p>
       </div>
 
       <div className="bg-black/30 backdrop-blur-md border-b border-white/10 p-6 text-white flex justify-between items-center z-10 relative">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight drop-shadow-md">Your Dream Reflection Journal</h2>
-          <p className="text-xs text-purple-300/80 mt-2">A Timeline of Your Subconscious Journeys</p>
+          <h2 className="text-3xl font-bold tracking-tight drop-shadow-md">Your Dream Journal</h2>
+          <p className="text-xs text-purple-300/80 mt-2">A look back at your past dreams</p>
         </div>
         <button
           onClick={onBackToInput}
@@ -86,7 +90,7 @@ export default function HistoryDashboard({ onBackToInput }) {
         {isLoading && (
           <div className="flex flex-col items-center justify-center py-12 space-y-4">
              <div className="w-10 h-10 border-4 border-purple-400 border-t-transparent rounded-full animate-spin"></div>
-             <p className="text-purple-300/70 text-sm">Retrieving your subconscious archives...</p>
+             <p className="text-purple-300/70 text-sm">Loading your past dreams...</p>
           </div>
         )}
 
@@ -122,7 +126,7 @@ export default function HistoryDashboard({ onBackToInput }) {
                     <div className="mt-5 pt-5 border-t border-white/10 space-y-4">
                       <div>
                         <h4 className="text-xs font-bold text-purple-300/70 uppercase tracking-wider drop-shadow-sm">
-                          Full Dream Snippet
+                          Your Original Dream
                         </h4>
                         <p className="text-sm text-gray-200 mt-1.5 italic leading-relaxed">
                           {entry.dream_text}
@@ -131,7 +135,7 @@ export default function HistoryDashboard({ onBackToInput }) {
 
                       <div className="p-4 bg-purple-900/20 rounded-xl border border-purple-400/20 shadow-inner">
                         <h4 className="text-xs font-bold text-purple-300 uppercase tracking-wider drop-shadow-sm border-b border-purple-500/30 pb-2 mb-3">
-                          Psychoanalytic Synthesis
+                          What Your Dream Means
                         </h4>
                         <div className="prose prose-invert max-w-none">
                           {renderFormattedText(entry.interpretation)}
@@ -149,7 +153,7 @@ export default function HistoryDashboard({ onBackToInput }) {
                       onClick={() => toggleExpandEntry(entry.id)}
                       className="text-xs text-purple-400 hover:text-purple-200 font-medium transition-colors cursor-pointer flex items-center justify-end w-full"
                     >
-                      {expandedEntryId === entry.id ? "Close Reflection" : "Read Full Reflection"}
+                      {expandedEntryId === entry.id ? "Close Entry" : "Read Full Entry"}
                     </button>
                   </div>
 
