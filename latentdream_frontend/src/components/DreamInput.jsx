@@ -2,20 +2,21 @@ import React, { useState } from 'react';
 
 /**
  * @file DreamInput.jsx
- * @description Ingestion interface capturing the user's initial manifest dream description.
- * Direct implementation of Functional Requirement FR-003 (Dream Logging Interface)[cite: 3].
+ * @description Primary ingestion interface for capturing the user's initial manifest dream description.
+ * This component directly fulfills Functional Requirement FR-003, ensuring the system can securely record 
+ * user dream logs.
  * 
- * Psychoanalytic Alignment:
- * In Sigmund Freud's classical framework, the "manifest content" is the literal, conscious
- * story recalled by the dreamer. This text entry field captures that raw narrative 
- * without clinical modification, providing the essential baseline data before
- * free association begins.
+ * Psychoanalytic Theoretical Alignment:
+ * Adhering strictly to classical Freudian methodology, this interface isolates the "manifest content" — the 
+ * literal, conscious narrative recalled by the dreamer — prior to the application of free association[cite: 1]. 
+ * By bypassing rigid, unscientific dream dictionaries, the raw text becomes the foundational dataset for the 
+ * subsequent conversational analysis[cite: 1].
  * 
- * Design Details:
- * - Implements the Controlled Component Pattern to manage local text state mutations safely.
- * - Restricts blank or empty space submissions, preventing unnecessary API requests.
- * - Glassmorphic UI (NFR-003): Incorporates translucent styling elements with neon 
- *   borders, creating an immersive experience that matches the "dream-like" theme.
+ * Architectural & UI Design Constraints:
+ * - Implements the Controlled Component Pattern to manage local state mutations safely.
+ * - Enforces a client-side guard clause to prevent empty submissions and unnecessary API requests.
+ * - Satisfies Non-Functional Requirement NFR-003 by applying a glassmorphic user interface (UI) to maintain 
+ *   an unobtrusive, highly usable environment[cite: 2].
  */
 export default function DreamInput({ onSubmit }) {
   const [dreamText, setDreamText] = useState('');
@@ -24,14 +25,15 @@ export default function DreamInput({ onSubmit }) {
   const handleSubmit = (event) => {
     event.preventDefault();
     
-    // Guard clause: Prevent empty submissions at the client-side border
+    // Guard clause: Prevent empty submissions at the client-side boundary
     if (!dreamText.trim()) {
       setError('Please write down your dream details before continuing.');
       return;
     }
 
     setError('');
-    onSubmit(dreamText); // Elevates the state payload to trigger the chat loop (FR-004)
+    // Elevates the state payload to trigger the LangChain driven prompt loop (FR-004)
+    onSubmit(dreamText); 
   };
 
   return (
@@ -63,10 +65,16 @@ export default function DreamInput({ onSubmit }) {
             Your Dream Diary Entry
           </label>
           
+          {/* 
+            * UI Refraction Update (NFR-003): 
+            * Replaced the opaque bg-black/40 utility with bg-white/5 and backdrop-blur-md. 
+            * This enforces the nested glass aesthetic, ensuring the interface remains 
+            * visually calm and unobtrusive for the user.
+            */}
           <textarea
             id="dream-narrative"
             rows="6"
-            className="w-full px-4 py-3 text-white bg-black/40 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-400 focus:bg-black/60 transition-all duration-300 resize-none placeholder-purple-300/30 shadow-inner text-sm leading-relaxed"
+            className="w-full px-4 py-3 text-white bg-white/5 backdrop-blur-md border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-white/30 focus:bg-white/10 transition-all duration-300 resize-none placeholder-purple-300/30 shadow-inner text-sm leading-relaxed"
             placeholder="What settings, events, and feelings do you remember most from your dream?"
             value={dreamText}
             onChange={(e) => setDreamText(e.target.value)}

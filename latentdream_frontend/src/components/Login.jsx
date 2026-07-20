@@ -1,16 +1,18 @@
 /**
  * @file Login.jsx
- * @description Implements client-side user authentication management loops.
- * This component orchestrates internal React states to dynamically pivot the user 
- * interface between session validation frameworks (FR-001) and credential registration 
- * pipelines (FR-002), executing non-blocking asynchronous handshakes with the 
- * underlying Firebase Identity Provider architecture.
+ * @description Client-side authentication component for the LatentDream application.
  * 
- * Technical & UI Design Considerations:
- * - Implements asynchronous try/catch blocks for resilient network error handling.
- * - Integrates with parent Glassmorphic UI wrappers, utilizing translucent input 
- * surfaces and luminous interaction states to maintain immersive aesthetics.
- * - Triggers state-lifting callbacks upon successful cryptographic token validation.
+ * Academic & Architectural Alignment:
+ * This module directly satisfies Functional Requirement FR-001 (User Management) by 
+ * providing secure account creation and session validation[cite: 2]. It also addresses 
+ * FR-002 by establishing the boundary that blocks unauthorized access to private journals[cite: 2].
+ * 
+ * Technical Implementation:
+ * - Executes asynchronous Firebase Authentication state management to securely 
+ *   isolate user data, satisfying NFR-002 (Security)[cite: 2].
+ * - Employs a glassmorphic user interface utilizing Tailwind CSS to align with the 
+ *   overarching NFR-003 usability and aesthetic targets.
+ * - Integrates robust exception handling to gracefully manage network rejections.
  */
 
 import React, { useState } from 'react';
@@ -28,6 +30,7 @@ const Login = ({ onLoginSuccess }) => {
   /**
    * Dispatches client input signatures to remote cloud authentication nodes.
    * Leverages catch blocks to safely intercept runtime transaction rejections.
+   * 
    * @param {React.FormEvent} e - Form submission event interface.
    */
   const handleAuthSubmit = async (e) => {
@@ -39,34 +42,31 @@ const Login = ({ onLoginSuccess }) => {
       if (isSignUp) {
         // Dispatches network payload to establish a novel user identity record (FR-001)
         await createUserWithEmailAndPassword(auth, email, password);
-        // Automatically pivot to the logged-in state upon successful registration
         if (onLoginSuccess) onLoginSuccess();
       } else {
         // Dispatches identity signatures to validate an active session domain (FR-001)
         await signInWithEmailAndPassword(auth, email, password);
-        // Pivot to the application interior 
         if (onLoginSuccess) onLoginSuccess();
       }
     } catch (err) {
-      // Isolates state anomalies and exposes standardized network exception descriptors
-      setError(err.message || "Authentication synchronization anomaly.");
+      // Isolates state anomalies and exposes standardized, user-friendly exception text
+      setError("Invalid email or password. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    /* Stripped outer backgrounds: Relies on the .dream-card wrapper from App.jsx */
     <div className="w-full space-y-6">
       
       <div className="text-center">
         <h2 className="text-3xl font-bold tracking-tight text-white drop-shadow-md">
-          {isSignUp ? "Create Dreamer Account" : "LatentDream Portal"}
+          {isSignUp ? "Create Account" : "LatentDream Login"}
         </h2>
         <p className="mt-2 text-sm text-purple-200/80">
           {isSignUp 
-            ? "Register to begin logging your subconscious narratives." 
-            : "Authenticate to access your secure psychoanalytic journal."}
+            ? "Sign up to start your private dream journal." 
+            : "Log in to access your past dreams and analysis."}
         </p>
       </div>
       
@@ -115,7 +115,7 @@ const Login = ({ onLoginSuccess }) => {
             disabled={loading}
             className="w-full flex justify-center rounded-xl bg-purple-600/80 px-4 py-3 text-sm font-medium text-white hover:bg-purple-500 disabled:bg-white/5 disabled:text-purple-300/40 border border-purple-400/50 shadow-[0_0_15px_rgba(168,85,247,0.3)] hover:shadow-[0_0_25px_rgba(168,85,247,0.6)] transition-all duration-300"
           >
-            {loading ? "Processing..." : isSignUp ? "Register Account" : "Secure Login"}
+            {loading ? "Processing..." : isSignUp ? "Sign Up" : "Log In"}
           </button>
         </div>
 
@@ -129,7 +129,7 @@ const Login = ({ onLoginSuccess }) => {
               setError('');
             }}
           >
-            {isSignUp ? "Already have an account? Sign In" : "New to LatentDream? Create an Account"}
+            {isSignUp ? "Already have an account? Log In" : "New to LatentDream? Create an Account"}
           </button>
         </div>
       </form>
